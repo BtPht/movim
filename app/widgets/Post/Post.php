@@ -7,7 +7,6 @@ use Moxl\Xec\Action\Pubsub\GetItem;
 use Moxl\Xec\Action\Microblog\CommentsGet;
 use Moxl\Xec\Action\Microblog\CommentPublish;
 
-use \Michelf\Markdown;
 use Respect\Validation\Validator;
 
 class Post extends \Movim\Widget\Base
@@ -18,24 +17,16 @@ class Post extends \Movim\Widget\Base
         $this->registerEvent('microblog_commentsget_handle', 'onComments');
         $this->registerEvent('microblog_commentpublish_handle', 'onCommentPublished');
         $this->registerEvent('microblog_commentsget_error', 'onCommentsError');
-        $this->registerEvent('pubsub_postpublish_handle', 'onPublish');
         $this->registerEvent('pubsub_postdelete_handle', 'onDelete');
         $this->registerEvent('pubsub_postdelete', 'onDelete');
         $this->registerEvent('pubsub_getitem_handle', 'onHandle');
-    }
-
-    function onPublish($packet)
-    {
-        Notification::append(false, $this->__('post.published'));
-        $this->ajaxClear();
-        RPC::call('MovimTpl.hidePanel');
     }
 
     function onHandle($packet)
     {
         $content = $packet->content;
 
-        if(isset($content['nodeid'])) {
+        if(is_array($content) && isset($content['nodeid'])) {
             $pd = new \Modl\PostnDAO;
             $p  = $pd->get($content['origin'], $content['node'], $content['nodeid']);
 
@@ -58,16 +49,19 @@ class Post extends \Movim\Widget\Base
 
     function onDelete($packet)
     {
-        $content = $packet->content;
+        list($server, $node, $id) = array_values($packet->content);
 
-        if(substr($content['node'], 0, 29) == 'urn:xmpp:microblog:0:comments') {
+        if(substr($node, 0, 29) == 'urn:xmpp:microblog:0:comments') {
             Notification::append(false, $this->__('post.comment_deleted'));
-            $this->ajaxGetComments($content['server'], substr($content['node'], 30));
+            $this->ajaxGetComments($server, substr($node, 30));
         } else {
             Notification::append(false, $this->__('post.deleted'));
-            $this->ajaxClear();
-            RPC::call('MovimTpl.hidePanel');
-            RPC::call('Menu_ajaxGetAll');
+
+            if($node == 'urn:xmpp:microblog:0') {
+                $this->rpc('MovimUtils.redirect', $this->route('news'));
+            } else {
+                $this->rpc('MovimUtils.redirect', $this->route('community', [$server, $node]));
+            }
         }
     }
 
@@ -75,16 +69,20 @@ class Post extends \Movim\Widget\Base
     {
         list($server, $node, $id) = array_values($packet->content);
 
-        $p = new \Modl\ContactPostn();
+        $p = new \Modl\ContactPostn;
         $p->nodeid = $id;
 
-        $pd = new \Modl\PostnDAO();
+        $pd = new \Modl\PostnDAO;
         $comments = $pd->getComments($p);
 
+        $emoji = \MovimEmoji::getInstance();
+
         $view = $this->tpl();
+        $view->assign('post', $p);
         $view->assign('comments', $comments);
         $view->assign('server', $server);
         $view->assign('node', $node);
+        $view->assign('hearth', $emoji->replace('♥'));
         $view->assign('id', $id);
 
         $html = $view->draw('_post_comments', true);
@@ -121,14 +119,12 @@ class Post extends \Movim\Widget\Base
         if($p) {
             $html = $this->preparePost($p);
 
-            RPC::call('MovimUtils.pushState', $this->route('news', [$p->origin, $p->node, $p->nodeid]));
-
             RPC::call('MovimTpl.fill', '#post_widget', $html);
             RPC::call('MovimUtils.enableVideos');
 
             // If the post is a reply but we don't have the original
             if($p->isReply() && !$p->getReply()) {
-                $reply = unserialize($p->reply);
+                $reply = $p->reply;
 
                 $gi = new GetItem;
                 $gi->setTo($reply['origin'])
@@ -160,6 +156,16 @@ class Post extends \Movim\Widget\Base
         Dialog::fill($view->draw('_post_delete', true));
     }
 
+    function ajaxShare($origin, $node, $id)
+    {
+        $pd = new \Modl\PostnDAO;
+        $p  = $pd->get($origin, $node, $id);
+
+        if($p) {
+            $this->rpc('MovimUtils.redirect', $this->route('publish', [$origin, $node, $id, 'share']));
+        }
+    }
+
     function ajaxDeleteConfirm($to, $node, $id) {
         $p = new PostDelete;
         $p->setTo($to)
@@ -184,15 +190,10 @@ class Post extends \Movim\Widget\Base
           ->request();
     }
 
-    function ajaxPublishComment($form, $to, $node, $id)
+    private function publishComment($comment, $to, $node, $id)
     {
-        $comment = trim($form->comment->value);
-
-        $validate_comment = Validator::stringType()->notEmpty();
-        $validate_id = Validator::stringType()->length(6, 128)->noWhitespace();
-
-        if(!$validate_comment->validate($comment)
-        || !$validate_id->validate($id)) return;
+        if(!Validator::stringType()->notEmpty()->validate($comment)
+        || !Validator::stringType()->length(6, 128)->noWhitespace()->validate($id)) return;
 
         $cp = new CommentPublish;
         $cp->setTo($to)
@@ -202,26 +203,40 @@ class Post extends \Movim\Widget\Base
            ->request();
     }
 
+    function ajaxPublishComment($form, $to, $node, $id)
+    {
+        $comment = trim($form->comment->value);
+
+        if($comment != '♥') {
+            $this->publishComment($comment, $to, $node, $id);
+        }
+    }
+
+    function ajaxLike($to, $node, $id)
+    {
+        $this->publishComment('♥', $to, $node, $id);
+    }
+
     function prepareEmpty()
     {
         $view = $this->tpl();
 
-        $nd = new \modl\PostnDAO;
-        $cd = new modl\ContactDAO;
+        $nd = new \Modl\PostnDAO;
+        $cd = new \Modl\ContactDAO;
 
         $view = $this->tpl();
 
         $view->assign('presencestxt', getPresencesTxt());
         $view->assign('top', $cd->getTop(6));
-        $view->assign('blogs', $nd->getLastBlogPublic(0, 6));
-        $view->assign('posts', $nd->getLastPublished(0, 4));
+        $view->assign('blogs', $nd->getLastBlogPublic(0, 8));
+        $view->assign('posts', $nd->getLastPublished(false, false, 0, 6));
         $view->assign('me', $cd->get($this->user->getLogin()), true);
         $view->assign('jid', $this->user->getLogin());
 
         return $view->draw('_post_empty', true);
     }
 
-    function preparePost($p, $external = false, $public = false)
+    function preparePost($p, $external = false, $public = false, $card = false)
     {
         $view = $this->tpl();
 
@@ -245,7 +260,12 @@ class Post extends \Movim\Widget\Base
 
             $view->assign('post', $p);
             $view->assign('attachments', $p->getAttachments());
-            return $view->draw('_post', true);
+
+            if($card) {
+                return $view->draw('_post_card', true);
+            } else {
+                return $view->draw('_post', true);
+            }
         } elseif(!$external) {
             return $this->prepareEmpty();
         }

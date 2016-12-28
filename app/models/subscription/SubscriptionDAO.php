@@ -1,9 +1,11 @@
 <?php
 
-namespace modl;
+namespace Modl;
 
-class SubscriptionDAO extends SQL {
-    function set(Subscription $s) {
+class SubscriptionDAO extends SQL
+{
+    function set(Subscription $s)
+    {
         $this->_sql = '
             update subscription
             set subscription = :subscription,
@@ -16,15 +18,15 @@ class SubscriptionDAO extends SQL {
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'subscription' => $s->subscription,
-                'timestamp' => date(DATE_ISO8601),
+                'timestamp' => date(SQL::SQL_DATE),
                 'jid'   => $s->jid,
                 'server'=> $s->server,
                 'node'  => $s->node,
                 'tags'  => $s->tags,
                 'subid' => $s->subid
-            )
+            ]
         );
 
         $this->run('Subscription');
@@ -37,22 +39,23 @@ class SubscriptionDAO extends SQL {
 
             $this->prepare(
                 'Subscription',
-                array(
+                [
                     'subscription' => $s->subscription,
-                    'timestamp' => date(DATE_ISO8601),
+                    'timestamp' => date(SQL::SQL_DATE),
                     'jid'   => $s->jid,
                     'server'=> $s->server,
                     'node'  => $s->node,
                     'tags'  => $s->tags,
                     'subid' => $s->subid
-                )
+                ]
             );
 
             $this->run('Subscription');
         }
     }
 
-    function get($server, $node) {
+    function get($server, $node)
+    {
         $this->_sql = '
             select * from subscription
             where jid = :jid
@@ -61,17 +64,36 @@ class SubscriptionDAO extends SQL {
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user,
                 'server' => $server,
                 'node' => $node
-            )
+            ]
         );
 
         return $this->run('Subscription');
     }
 
-    function getSubscribed() {
+    function getAll($server, $node)
+    {
+        $this->_sql = '
+            select * from subscription
+            where server = :server
+                and node = :node';
+
+        $this->prepare(
+            'Subscription',
+            [
+                'server' => $server,
+                'node' => $node
+            ]
+        );
+
+        return $this->run('Subscription');
+    }
+
+    function getSubscribed()
+    {
         $this->_sql = '
             select
                 subscription.jid,
@@ -103,30 +125,32 @@ class SubscriptionDAO extends SQL {
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Subscription');
     }
 
-    function delete() {
+    function delete()
+    {
         $this->_sql = '
             delete from subscription
             where jid = :jid';
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Subscription');
     }
 
-    function deleteNode($server, $node) {
+    function deleteNode($server, $node)
+    {
         $this->_sql = '
             delete from subscription
             where jid = :jid
@@ -135,17 +159,18 @@ class SubscriptionDAO extends SQL {
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user,
                 'server' => $server,
                 'node' => $node
-            )
+            ]
         );
 
         return $this->run('Subscription');
     }
 
-    function deleteNodeSubid($server, $node, $subid) {
+    function deleteNodeSubid($server, $node, $subid)
+    {
         $this->_sql = '
             delete from subscription
             where jid = :jid
@@ -155,12 +180,12 @@ class SubscriptionDAO extends SQL {
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user,
                 'server' => $server,
                 'node' => $node,
                 'subid' => $subid,
-            )
+            ]
         );
 
         return $this->run('Subscription');

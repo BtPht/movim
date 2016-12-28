@@ -1,8 +1,11 @@
 <?php
 
-namespace modl;
+namespace Modl;
 
-class Item extends Model {
+use Movim\Picture;
+
+class Item extends Model
+{
     public $server;
     public $jid;
     public $name;
@@ -12,47 +15,38 @@ class Item extends Model {
     public $updated;
     public $description;
     public $subscription;
+    public $logo;
     public $num;
     public $sub;
-    public $logo;
 
-    public function __construct() {
-        $this->_struct = '
-        {
-            "server" :
-                {"type":"string", "size":64, "key":true },
-            "jid" :
-                {"type":"string", "size":64, "key":true },
-            "node" :
-                {"type":"string", "size":96, "key":true },
-            "creator" :
-                {"type":"string", "size":64 },
-            "name" :
-                {"type":"string", "size":128 },
-            "created" :
-                {"type":"date"},
-            "description" :
-                {"type":"text"},
-            "logo" :
-                {"type":"bool"},
-            "updated" :
-                {"type":"date", "mandatory":true}
-        }';
+    public $_struct = [
+        'server'    => ['type' => 'string','size' => 64,'key' => true],
+        'jid'       => ['type' => 'string','size' => 64,'key' => true],
+        'node'      => ['type' => 'string','size' => 96,'key' => true],
+        'creator'   => ['type' => 'string','size' => 64],
+        'name'      => ['type' => 'string','size' => 128],
+        'created'   => ['type' => 'date'],
+        'description' => ['type' => 'text'],
+        'logo'      => ['type' => 'bool'],
+        'updated'   => ['type' => 'date','mandatory' => true],
+    ];
 
-        parent::__construct();
-    }
-
-    public function set($item, $from) {
+    public function set($item, $from)
+    {
         $this->server = $from;
         $this->node   = (string)$item->attributes()->node;
         $this->jid    = (string)$item->attributes()->jid;
-        if($this->jid == null)
+
+        if($this->jid == null) {
             $this->jid = $this->node;
+        }
+
         $this->name   = (string)$item->attributes()->name;
-        $this->updated  = date('Y-m-d H:i:s');
+        $this->updated  = date(SQL::SQL_DATE);
     }
 
-    public function setMetadata($metadata, $from, $node) {
+    public function setMetadata($metadata, $from, $node)
+    {
         $this->server = $from;
         $this->jid = $from;
         $this->node = $node;
@@ -68,7 +62,7 @@ class Item extends Model {
                     $this->creator = (string)$i->value;
                     break;
                 case 'pubsub#creation_date':
-                    $this->created = (string)$i->value;
+                    $this->created = date(SQL::SQL_DATE, strtotime((string)$i->value));
                     break;
                 case 'pubsub#description':
                     $this->description = (string)$i->value;
@@ -87,7 +81,7 @@ class Item extends Model {
         if($item) {
             $item->getAttachments();
 
-            $p = new \Picture;
+            $p = new Picture;
             if($item->getPublicUrl()) {
                 try {
                     $embed = \Embed\Embed::create($item->getPublicUrl());
@@ -96,7 +90,7 @@ class Item extends Model {
                     $url = false;
                     foreach($embed->providerIcons as $icon) {
                         if($icon['mime'] != 'image/x-icon') {
-                            $url = $icon['value'];
+                            $url = $icon['url'];
                         }
                     }
 
@@ -122,13 +116,14 @@ class Item extends Model {
         }
     }
 
-    public function getLogo()
+    public function getLogo($size = false)
     {
-        $p = new \Picture;
-        return $p->get($this->server.$this->node, 120);
+        $p = new Picture;
+        return $p->get($this->server.$this->node, $size);
     }
 
-    public function getName() {
+    public function getName()
+    {
         if($this->name != null)
             return $this->name;
         elseif($this->node != null)
@@ -138,7 +133,8 @@ class Item extends Model {
     }
 }
 
-class Server extends Item {
+class Server extends Item
+{
     public $server;
     public $number;
     public $name;

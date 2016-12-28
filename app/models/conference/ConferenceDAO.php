@@ -2,8 +2,10 @@
 
 namespace modl;
 
-class ConferenceDAO extends SQL {
-    function set(Conference $c) {
+class ConferenceDAO extends SQL
+{
+    function set(Conference $c)
+    {
         $this->_sql = '
             update conference
             set name        = :name,
@@ -15,14 +17,14 @@ class ConferenceDAO extends SQL {
 
         $this->prepare(
             'Conference',
-            array(
+            [
                 'jid'           => $c->jid,
                 'conference'    => $c->conference,
                 'name'          => $c->name,
                 'nick'          => $c->nick,
                 'autojoin'      => $c->autojoin,
                 'status'        => $c->status
-            )
+            ]
         );
 
         $this->run('Conference');
@@ -35,21 +37,22 @@ class ConferenceDAO extends SQL {
 
             $this->prepare(
                 'Conference',
-                array(
+                [
                     'jid'           => $c->jid,
                     'conference'    => $c->conference,
                     'name'          => $c->name,
                     'nick'          => $c->nick,
                     'autojoin'      => $c->autojoin,
                     'status'        => $c->status
-                )
+                ]
             );
 
             $this->run('Conference');
         }
     }
 
-    function get($conference) {
+    function get($conference)
+    {
         $this->_sql = '
             select * from conference
             where jid       = :jid
@@ -57,16 +60,17 @@ class ConferenceDAO extends SQL {
 
         $this->prepare(
             'Conference',
-            array(
+            [
                 'jid' => $this->_user,
                 'conference' => $conference,
-            )
+            ]
         );
 
         return $this->run('Conference', 'item');
     }
 
-    function getAll() {
+    function getAll()
+    {
         $this->_sql = '
             select * from conference
             where jid = :jid
@@ -74,30 +78,32 @@ class ConferenceDAO extends SQL {
 
         $this->prepare(
             'Conference',
-            array(
+            [
                 'jid' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Conference');
     }
 
-    function delete() {
+    function delete()
+    {
         $this->_sql = '
             delete from conference
             where jid = :jid';
 
         $this->prepare(
             'Subscription',
-            array(
+            [
                 'jid' => $this->_user
-            )
+            ]
         );
 
         return $this->run('conference');
     }
 
-    function deleteNode($conference) {
+    function deleteNode($conference)
+    {
         $this->_sql = '
             delete from conference
             where jid       = :jid
@@ -105,10 +111,10 @@ class ConferenceDAO extends SQL {
 
         $this->prepare(
             'Conference',
-            array(
+            [
                 'jid' => $this->_user,
                 'conference' => $conference
-            )
+            ]
         );
 
         return $this->run('Conference');

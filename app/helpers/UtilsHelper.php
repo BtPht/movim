@@ -494,7 +494,8 @@ function getMood() {
 /*
  * Generate a standard UUID
  */
-function generateUUID($string = false) {
+function generateUUID($string = false)
+{
     if($string != false)
         $data = $string;
     else
@@ -506,7 +507,8 @@ function generateUUID($string = false) {
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
-function movim_log($logs) {
+function movim_log($logs)
+{
     $log = new Logger('movim');
     $log->pushHandler(new SyslogHandler('movim'));
 
@@ -521,7 +523,8 @@ function movim_log($logs) {
  * @desc Generate a simple random key
  * @params The size of the key
  */
-function generateKey($size) {
+function generateKey($size)
+{
     // Generating the session cookie's hash.
     $hash_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $hash = "";
@@ -536,7 +539,8 @@ function generateKey($size) {
 /*
  * @desc Get the range aroung a position with a radius
  */
-function geoRadius($latitude, $longitude, $radius) {
+function geoRadius($latitude, $longitude, $radius)
+{
     $lat_range = $range/69.172;
     $lon_range = abs($range/(cos($latitude) * 69.172));
     $min_lat = number_format($latitude - $lat_range, "4", ".", "");
@@ -544,13 +548,13 @@ function geoRadius($latitude, $longitude, $radius) {
     $min_lon = number_format($longitude - $lon_range, "4", ".", "");
     $max_lon = number_format($longitude + $lon_range, "4", ".", "");
 
-    return array($min_lat, $max_lat, $min_lon, $max_lon);
+    return [$min_lat, $max_lat, $min_lon, $max_lon];
 }
 
 /*
  * @desc Request a simple url
  */
-function requestURL($url, $timeout = 10, $post = false)
+function requestURL($url, $timeout = 10, $post = false, $json = false)
 {
     $ch = curl_init($url);
 
@@ -560,6 +564,10 @@ function requestURL($url, $timeout = 10, $post = false)
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0');
+
+    if($json) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+    }
 
     if(is_array($post)) {
         $params = '';
@@ -587,43 +595,6 @@ function requestURL($url, $timeout = 10, $post = false)
     }
 }
 
-/*
- * @desc Check if the URL is a small picture
- */
-function isSmallPicture($url, $size = false)
-{
-    if(!$size) $size = SMALL_PICTURE_LIMIT;
-
-    $client = new Guzzle\Http\Client($url, [
-        'request.options' => [
-            'timeout' => 2,
-            'connect_timeout' => 2
-        ]
-    ]);
-
-    $request = $client->head('');
-
-    try {
-        $response = $request->send();
-
-        $length = $response->getHeader('content-length');
-
-        if($length) {
-            $length = (int)$length->toArray()[0];
-            $type   = (string)$response->getHeader('content-type');
-
-            $typearr = explode('/', $type);
-
-            return ($typearr[0] == 'image'
-                && $length <= $size
-                && $length >= 10000);
-        }
-
-        return false;
-    } catch(\Exception $e) {
-        return false;
-    }
-}
 /*
  * @desc Get the URI of a smiley
  */

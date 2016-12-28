@@ -11,7 +11,6 @@ use Moxl\Xec\Action\Storage\Get;
 
 class Presence extends \Movim\Widget\Base
 {
-
     function load()
     {
         $this->addcss('presence.css');
@@ -51,16 +50,13 @@ class Presence extends \Movim\Widget\Base
     {
         if($form == false) {
             // We update the cache with our status and presence
-            $presence = Cache::c('presence');
+            $presence = \Movim\Cache::c('presence');
 
             $value = $presence['show'];
             $status = $presence['status'];
 
             if($presence == null || !isset($presence['show']) || $presence['show'] == '')
                 $value = 'chat';
-
-            if($presence == null|| !isset($presence['status']) || $presence['status'] == '')
-                $status = $this->__('status.online');
         } else {
             $status = $form['status'];
             $value = $form['value'];
@@ -87,12 +83,12 @@ class Presence extends \Movim\Widget\Base
             }
         }
 
-        Cache::c(
+        \Movim\Cache::c(
             'presence',
-            array(
+            [
                 'status' => $status,
                 'show' => $value
-                )
+            ]
         );
     }
 
@@ -217,10 +213,10 @@ class Presence extends \Movim\Widget\Base
 
         $session = \Session::start();
 
-        $pd = new \Modl\PresenceDAO();
+        $pd = new \Modl\PresenceDAO;
         $p = $pd->getPresence($session->get('jid'), $session->get('resource'));
 
-        $cd = new \Modl\ContactDAO();
+        $cd = new \Modl\ContactDAO;
         $contact = $cd->get($session->get('jid'));
         if($contact == null) {
             $contact = new \Modl\Contact;

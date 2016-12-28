@@ -1,21 +1,24 @@
 <?php
 
-class Subscribe extends \Movim\Widget\Base {
-
+class Subscribe extends \Movim\Widget\Base
+{
     function load()
     {
     }
 
-    function flagPath($country) {
+    function flagPath($country)
+    {
         return BASE_URI.'themes/material/img/flags/'.strtolower($country).'.png';
     }
 
-    function accountNext($server) {
-        return Route::urlize('accountnext', array($server));
+    function accountNext($server)
+    {
+        return $this->route('accountnext', [$server]);
     }
 
-    function display() {
-        $json = requestURL(MOVIM_API.'servers', 3);
+    function display()
+    {
+        $json = requestURL(MOVIM_API.'servers', 3, false, true);
         $json = json_decode($json);
 
         $cd = new \Modl\ConfigDAO;

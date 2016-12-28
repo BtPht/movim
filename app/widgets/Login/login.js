@@ -23,7 +23,6 @@ var Login = {
             button.value = button.dataset.loading;
 
             localStorage.username = document.querySelector('input#username').value;
-            Login.rememberSession(localStorage.username);
 
             // A fallback security
             setTimeout("MovimWebsocket.unregister()", 20000);
@@ -32,7 +31,7 @@ var Login = {
         }, false);
     },
 
-    refresh: function(){
+    refresh: function() {
         /*Add onclick listeners*/
         var sessions = document.querySelectorAll('#sessions section ul > li');
         var i = 0;
@@ -129,7 +128,11 @@ var Login = {
         Login.rememberSession(jid);
         localStorage.postStart = 1;
 
-        MovimUtils.redirect(url);
+        if(MovimUtils.urlParts().page != 'login') {
+            MovimUtils.reloadThis();
+        } else {
+            MovimUtils.redirect(url);
+        }
     },
 
     /**
@@ -170,12 +173,12 @@ MovimWebsocket.register(function()
     }
 });
 
-movim_add_onload(function() {
+movim_add_onload(function()
+{
     // We had the autocomplete system
     var login = document.querySelector('input#username');
     login.addEventListener('input', function() {
         if(this.value.indexOf('@') == -1) {
-            // TODO allow another server here
             document.querySelector('input#complete').value = this.value + '@' + Login.domain;
         } else {
             document.querySelector('input#complete').value = this.value;

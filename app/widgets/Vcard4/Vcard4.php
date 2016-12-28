@@ -85,18 +85,15 @@ class Vcard4 extends \Movim\Widget\Base
         Notification::append(null, $this->__('vcard.updated'));
 
         RPC::call('MovimTpl.fill', '#vcard_form', $html);
-        RPC::commit();
     }
 
     function onMyVcard4Received() {
         RPC::call('MovimUtils.buttonReset', '#vcard4validate');
         Notification::append(null, $this->__('vcard.updated'));
-        RPC::commit();
     }
 
     function onMyVcard4NotReceived() {
         Notification::append(null, $this->__('vcard.not_updated'));
-        RPC::commit();
     }
 
     function ajaxGetVcard() {
@@ -155,6 +152,8 @@ class Vcard4 extends \Movim\Widget\Base
 
         if(Validator::email()->validate($vcard->email->value))
             $c->email   = $vcard->email->value;
+        else
+            $c->email = '';
 
         $c->twitter = $vcard->twitter->value;
         $c->skype   = $vcard->skype->value;

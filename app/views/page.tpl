@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="roster">
+<html>
   <head>
     <meta charset="utf-8" />
     <title><?php $this->title();?></title>
@@ -43,7 +43,7 @@
         $this->scripts();
     ?>
     </head>
-    <body>
+    <body dir="<?php $this->dir();?>">
         <noscript>
             <style type="text/css">
                 nav {display:none;} #content {display: none;}
@@ -64,10 +64,10 @@
                         <?php echo __('error.websocket'); ?>
                     </p>
                 </li>
+            </ul>
         </div>
         <?php $this->widget('Dialog');?>
         <?php $this->widget('Drawer');?>
-        <?php $this->widget('Notification');?>
         <?php $this->content();?>
         <script type="text/javascript">if(typeof movim_onload == 'function') { movim_onload(); }</script>
     </body>

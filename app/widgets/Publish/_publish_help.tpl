@@ -1,5 +1,5 @@
 <section>
-    <h3>{$c->__('post.help')}</h3>
+    <h3>{$c->__('publish.help')}</h3>
     <ul class="list thick flex">
         <li class="block">
             <span class="primary icon">
@@ -64,25 +64,24 @@
     </ul>
     <ul class="list">
         <li class="subheader">
-            <p>{$c->__('post.help_more')}</p>
+            <p>{$c->__('publish.help_more')}</p>
         </li>
-            <li>
-                <span class="primary icon color bubble blue">
-                    <i class="zmdi zmdi-star"></i>
-                </span>
-                <span class="control icon gray">
-                    <i class="zmdi zmdi-chevron-right"></i>
-                </span>
-                <p class="line">
-                    {$c->__('post.help_manual')}
-                </p>
-                <p class="line">
-                    <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">
-                        http://daringfireball.net/projects/markdown/syntax
-                    </a>
-                </p>
-            </li>
-        </a>
+        <li>
+            <span class="primary icon color bubble blue">
+                <i class="zmdi zmdi-star"></i>
+            </span>
+            <span class="control icon gray">
+                <i class="zmdi zmdi-chevron-right"></i>
+            </span>
+            <p class="line">
+                {$c->__('publish.help_manual')}
+            </p>
+            <p class="line">
+                <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">
+                    http://daringfireball.net/projects/markdown/syntax
+                </a>
+            </p>
+        </li>
     </ul>
 </section>
 <div>

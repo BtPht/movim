@@ -80,7 +80,7 @@ class Rooms extends \Movim\Widget\Base
     /**
      * @brief Display the add room form
      */
-    function ajaxAdd()
+    function ajaxAdd($room = false)
     {
         $view = $this->tpl();
 
@@ -91,6 +91,7 @@ class Rooms extends \Movim\Widget\Base
             $view->assign('server', $item->jid);
         }
 
+        $view->assign('id', $room);
         $view->assign('username', $this->user->getUser());
 
         Dialog::fill($view->draw('_rooms_add', true));
@@ -237,7 +238,7 @@ class Rooms extends \Movim\Widget\Base
                         'server'    => $s->server,
                         'title'     => $s->title,
                         'subid'     => $s->subid,
-                        'tags'      => unserialize($s->tags),
+                        'tags'      => $s->tags,
                         'node'      => $s->node]);
             }
         }
@@ -288,7 +289,7 @@ class Rooms extends \Movim\Widget\Base
     function prepareRooms($edit = false)
     {
         $view = $this->tpl();
-        $cod = new \modl\ConferenceDAO();
+        $cod = new \Modl\ConferenceDAO;
 
         $list = $cod->getAll();
 

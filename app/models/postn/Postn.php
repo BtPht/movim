@@ -4,7 +4,10 @@ namespace Modl;
 
 use Respect\Validation\Validator;
 
-class Postn extends Model {
+use Movim\Picture;
+
+class Postn extends Model
+{
     public $origin;         // Where the post is comming from (jid or server)
     public $node;           // microblog or pubsub
     public $nodeid;         // the ID if the item
@@ -21,9 +24,9 @@ class Postn extends Model {
     public $commentorigin;
     public $commentnodeid;
 
-    public $published;      //
-    public $updated;        //
-    public $delay;          //
+    public $published;
+    public $updated;
+    public $delay;
 
     public $picture;        // Tell if the post contain embeded pictures
 
@@ -42,67 +45,40 @@ class Postn extends Model {
     public $logo;
     private $openlink;
 
-    public function __construct() {
+    public $_struct = [
+        'origin'        => ['type' => 'string','size' => 64,'key' => true],
+        'node'          => ['type' => 'string','size' => 96,'key' => true],
+        'nodeid'        => ['type' => 'string','size' => 96,'key' => true],
+        'aname'         => ['type' => 'string','size' => 128],
+        'aid'           => ['type' => 'string','size' => 64],
+        'aemail'        => ['type' => 'string','size' => 64],
+        'title'         => ['type' => 'text'],
+        'content'       => ['type' => 'text'],
+        'contentraw'    => ['type' => 'text'],
+        'contentcleaned' => ['type' => 'text'],
+        'commentorigin' => ['type' => 'string','size' => 64],
+        'commentnodeid' => ['type' => 'string','size' => 96],
+        'open'          => ['type' => 'bool'],
+        'published'     => ['type' => 'date'],
+        'updated'       => ['type' => 'date'],
+        'delay'         => ['type' => 'date'],
+        'reply'         => ['type' => 'serialized'],
+        'lat'           => ['type' => 'string','size' => 32],
+        'lon'           => ['type' => 'string','size' => 32],
+        'links'         => ['type' => 'serialized'],
+        'picture'       => ['type' => 'text'],
+        'hash'          => ['type' => 'string','size' => 128,'mandatory' => true]
+    ];
+
+    public function __construct()
+    {
         $this->hash = md5(openssl_random_pseudo_bytes(5));
-
-        $this->_struct = '
-        {
-            "origin" :
-                {"type":"string", "size":64, "key":true },
-            "node" :
-                {"type":"string", "size":96, "key":true },
-            "nodeid" :
-                {"type":"string", "size":96, "key":true },
-            "aname" :
-                {"type":"string", "size":128 },
-            "aid" :
-                {"type":"string", "size":64 },
-            "aemail" :
-                {"type":"string", "size":64 },
-            "title" :
-                {"type":"text" },
-            "content" :
-                {"type":"text" },
-            "contentraw" :
-                {"type":"text" },
-            "contentcleaned" :
-                {"type":"text" },
-            "commentorigin" :
-                {"type":"string", "size":64 },
-            "commentnodeid" :
-                {"type":"string", "size":96 },
-
-            "open" :
-                {"type":"bool"},
-
-            "published" :
-                {"type":"date" },
-            "updated" :
-                {"type":"date" },
-            "delay" :
-                {"type":"date" },
-
-            "reply" :
-                {"type":"text" },
-
-            "lat" :
-                {"type":"string", "size":32 },
-            "lon" :
-                {"type":"string", "size":32 },
-
-            "links" :
-                {"type":"text" },
-            "picture" :
-                {"type":"text" },
-            "hash" :
-                {"type":"string", "size":128, "mandatory":true }
-        }';
-
-        parent::__construct();
     }
 
-    private function getContent($contents) {
+    private function getContent($contents)
+    {
         $content = '';
+
         foreach($contents as $c) {
             switch($c->attributes()->type) {
                 case 'html':
@@ -118,7 +94,7 @@ class Postn extends Model {
                     break;
                 case 'text':
                     if(trim($c) != '') {
-                        $this->__set('contentraw', trim($c));
+                        $this->contentraw = trim($c);
                     }
                     break;
                 default :
@@ -130,7 +106,8 @@ class Postn extends Model {
         return $content;
     }
 
-    private function getTitle($titles) {
+    private function getTitle($titles)
+    {
         $title = '';
         foreach($titles as $t) {
             switch($t->attributes()->type) {
@@ -152,40 +129,41 @@ class Postn extends Model {
         return $title;
     }
 
-    public function set($item, $from, $delay = false, $node = false) {
+    public function set($item, $from, $delay = false, $node = false)
+    {
         if($item->item)
             $entry = $item->item;
         else
             $entry = $item;
 
         if($from != '')
-            $this->__set('origin', $from);
+            $this->origin = $from;
 
         if($node)
-            $this->__set('node', $node);
+            $this->node = $node;
         else
-            $this->__set('node', (string)$item->attributes()->node);
+            $this->node = (string)$item->attributes()->node;
 
-        $this->__set('nodeid', (string)$entry->attributes()->id);
+        $this->nodeid = (string)$entry->attributes()->id;
 
         if($entry->entry->id)
-            $this->__set('nodeid', (string)$entry->entry->id);
+            $this->nodeid = (string)$entry->entry->id;
 
         // Get some informations on the author
         if($entry->entry->author->name)
-            $this->__set('aname', (string)$entry->entry->author->name);
+            $this->aname = (string)$entry->entry->author->name;
         if($entry->entry->author->uri)
-            $this->__set('aid', substr((string)$entry->entry->author->uri, 5));
+            $this->aid = substr((string)$entry->entry->author->uri, 5);
         if($entry->entry->author->email)
-            $this->__set('aemail', (string)$entry->entry->author->email);
+            $this->aemail = (string)$entry->entry->author->email;
 
         // Non standard support
         if($entry->entry->source && $entry->entry->source->author->name)
-            $this->__set('aname', (string)$entry->entry->source->author->name);
+            $this->aname = (string)$entry->entry->source->author->name;
         if($entry->entry->source && $entry->entry->source->author->uri)
-            $this->__set('aid', substr((string)$entry->entry->source->author->uri, 5));
+            $this->aid = substr((string)$entry->entry->source->author->uri, 5);
 
-        $this->__set('title', $this->getTitle($entry->entry->title));
+        $this->title = $this->getTitle($entry->entry->title);
 
         // Content
         if($entry->entry->summary && (string)$entry->entry->summary != '')
@@ -203,35 +181,35 @@ class Postn extends Model {
         $content = $summary.$content;
 
         if($entry->entry->updated)
-            $this->__set('updated', (string)$entry->entry->updated);
+            $this->updated = (string)$entry->entry->updated;
         else
-            $this->__set('updated', gmdate(DATE_ISO8601));
+            $this->updated = gmdate(SQL::SQL_DATE);
 
         if($entry->entry->published)
-            $this->__set('published', (string)$entry->entry->published);
+            $this->published = (string)$entry->entry->published;
         elseif($entry->entry->updated)
-            $this->__set('published', (string)$entry->entry->updated);
+            $this->published = (string)$entry->entry->updated;
         else
-            $this->__set('published', gmdate(DATE_ISO8601));
+            $this->published = gmdate(SQL::SQL_DATE);
 
         if($delay)
-            $this->__set('delay', $delay);
+            $this->delay = $delay;
 
         // Tags parsing
         if($entry->entry->category) {
             $td = new \Modl\TagDAO;
-            $td->delete($this->__get('nodeid'));
+            $td->delete($this->nodeid);
 
             if($entry->entry->category->count() == 1
             && isset($entry->entry->category->attributes()->term)) {
                 $tag = new \Modl\Tag;
-                $tag->nodeid = $this->__get('nodeid');
+                $tag->nodeid = $this->nodeid;
                 $tag->tag    = strtolower((string)$entry->entry->category->attributes()->term);
                 $td->set($tag);
             } else {
                 foreach($entry->entry->category as $cat) {
                     $tag = new \Modl\Tag;
-                    $tag->nodeid = $this->__get('nodeid');
+                    $tag->nodeid = $this->nodeid;
                     $tag->tag    = strtolower((string)$cat->attributes()->term);
                     $td->set($tag);
                 }
@@ -239,44 +217,21 @@ class Postn extends Model {
         }
 
         if(!isset($this->commentorigin))
-            $this->__set('commentorigin', $this->origin);
+            $this->commentorigin = $this->origin;
 
-        $this->__set('content', trim($content));
+        $this->content = trim($content);
         $this->contentcleaned = purifyHTML(html_entity_decode($this->content));
-
-        $extra = false;
-        // We try to extract a picture
-        $xml = \simplexml_load_string('<div>'.$this->contentcleaned.'</div>');
-        if($xml) {
-            $results = $xml->xpath('//img/@src');
-            if(is_array($results) && !empty($results)) {
-                $extra = (string)$results[0];
-                if(isSmallPicture($extra)) {
-                    $this->picture = $extra;
-                }
-            }
-
-            $results = $xml->xpath('//video/@poster');
-            if(is_array($results) && !empty($results)) {
-                $extra = (string)$results[0];
-                if(isSmallPicture($extra)) {
-                    $this->picture = $extra;
-                }
-            }
-        }
-
-        $this->setAttachments($entry->entry->link, $extra);
 
         if($entry->entry->geoloc) {
             if($entry->entry->geoloc->lat != 0)
-                $this->__set('lat', (string)$entry->entry->geoloc->lat);
+                $this->lat = (string)$entry->entry->geoloc->lat;
             if($entry->entry->geoloc->lon != 0)
-                $this->__set('lon', (string)$entry->entry->geoloc->lon);
+                $this->lon = (string)$entry->entry->geoloc->lon;
         }
 
         // We fill empty aid
         if($this->isMicroblog() && empty($this->aid)) {
-            $this->__set('aid', $this->origin);
+            $this->aid = $this->origin;
         }
 
         // We check if this is a reply
@@ -289,21 +244,60 @@ class Postn extends Model {
                 'nodeid' => substr($arr[2], 5)
             ];
 
-            $this->__set('reply', serialize($reply));
+            $this->reply = $reply;
         }
+
+        $extra = false;
+        // We try to extract a picture
+        $xml = \simplexml_load_string('<div>'.$this->contentcleaned.'</div>');
+        if($xml) {
+            $results = $xml->xpath('//img/@src');
+
+            $check = new \Movim\Task\CheckSmallPicture;
+
+            if(is_array($results) && !empty($results)) {
+                $extra = (string)$results[0];
+
+                return $check->run($extra)
+                    ->then(function($small) use($extra, $entry) {
+                        if($small) $this->picture = $extra;
+                        $this->setAttachments($entry->entry->link, $extra);
+                    });
+            } else {
+                $results = $xml->xpath('//video/@poster');
+                if(is_array($results) && !empty($results)) {
+                    $extra = (string)$results[0];
+
+                    return $check->run($extra)
+                        ->then(function($small) use($extra, $entry) {
+                            $this->picture = $extra;
+                            $this->setAttachments($entry->entry->link, $extra);
+                        });
+                }
+            }
+
+            $results = $xml->xpath('//a');
+            if(is_array($results) && !empty($results)) {
+                foreach($results as $link) {
+                    $link->addAttribute('target', '_blank');
+                }
+            }
+        }
+
+        $this->setAttachments($entry->entry->link, $extra);
+
+        return new \React\Promise\Promise(function($resolve) {
+            $resolve(true);
+        });
     }
 
-    private function typeIsPicture($type) {
+    private function typeIsPicture($type)
+    {
         return in_array($type, ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']);
     }
 
-    private function typeIsLink($link) {
-        return (isset($link['rel'])
-        && in_array($link['rel'], ['related', 'alternate'])
-        && Validator::url()->validate($link['href']));
-    }
-
-    private function setAttachments($links, $extra = false) {
+    private function setAttachments($links, $extra = false)
+    {
         $l = [];
 
         foreach($links as $attachment) {
@@ -315,7 +309,7 @@ class Postn extends Model {
             if($this->picture == null
             && isset($enc['type'])
             && $this->typeIsPicture($enc['type'])
-            && isSmallPicture($enc['href'])) {
+            /*&& isSmallPicture($enc['href'])*/) {
                 $this->picture = $enc['href'];
             }
 
@@ -340,7 +334,7 @@ class Postn extends Model {
         }
 
         if(!empty($l)) {
-            $this->links = serialize($l);
+            $this->links = $l;
         }
     }
 
@@ -350,7 +344,7 @@ class Postn extends Model {
         $this->openlink = null;
 
         if(isset($this->links)) {
-            $links = unserialize($this->links);
+            $links = $this->links;
             $attachments = [
                 'pictures' => [],
                 'files' => [],
@@ -412,18 +406,16 @@ class Postn extends Model {
         return $attachments;
     }
 
-    public function getAttachment($link = false)
+    public function getAttachment()
     {
         $attachments = $this->getAttachments();
 
-        if(isset($attachments['pictures']) && !isset($attachments['links'])) {
-            return $attachments['pictures'][0];
-        }
-        if(isset($attachments['files']) && !$link) {
-            return $attachments['files'][0];
-        }
-        if(isset($attachments['links'])) {
-            return $attachments['links'][0];
+        foreach($attachments as $key => $group) {
+            foreach($group as $attachment) {
+                if(in_array($attachment['rel'], ['enclosure', 'related'])) {
+                    return $attachment;
+                }
+            }
         }
 
         return false;
@@ -446,7 +438,7 @@ class Postn extends Model {
 
     public function getLogo()
     {
-        $p = new \Picture;
+        $p = new Picture;
         return $p->get($this->origin.$this->node, 120);
     }
 
@@ -464,15 +456,27 @@ class Postn extends Model {
         return 'xmpp:'.$this->origin.'?;node='.$this->node.';item='.$this->nodeid;
     }
 
-    public function isMine()
+    // Works only for the microblog posts
+    public function getParent()
     {
-        $user = new \User();
-
-        return ($this->aid == $user->getLogin()
-        || $this->origin == $user->getLogin());
+        $pd = new PostnDAO;
+        return $pd->get($this->origin, 'urn:xmpp:microblog:0', preg_replace("/urn:xmpp:microblog:0:comments\/(.*)/", "$1", $this->node));
     }
 
-    public function isPublic() {
+    public function isMine($force = false)
+    {
+        $user = new \User;
+
+        if($force) {
+            return ($this->aid == $user->getLogin());
+        } else {
+            return ($this->aid == $user->getLogin()
+            || $this->origin == $user->getLogin());
+        }
+    }
+
+    public function isPublic()
+    {
         return ($this->open);
     }
 
@@ -501,11 +505,26 @@ class Postn extends Model {
         return isset($this->reply);
     }
 
+    public function isLike()
+    {
+        return ($this->contentraw == '♥');
+    }
+
+    public function isRTL()
+    {
+        return isRTL($this->contentraw);
+    }
+
+    public function getSummary()
+    {
+        return truncate(stripTags(html_entity_decode($this->contentcleaned)), 140);
+    }
+
     public function getReply()
     {
         if(!$this->reply) return;
 
-        $reply = unserialize($this->reply);
+        $reply = $this->reply;
         $pd = new \Modl\PostnDAO;
         return $pd->get($reply['origin'], $reply['node'], $reply['nodeid']);
     }
@@ -519,6 +538,12 @@ class Postn extends Model {
     {
         $pd = new \Modl\PostnDAO;
         return $pd->countComments($this->commentorigin, $this->commentnodeid);
+    }
+
+    public function countLikes()
+    {
+        $pd = new \Modl\PostnDAO;
+        return $pd->countLikes($this->commentorigin, $this->commentnodeid);
     }
 
     public function getTags()
@@ -537,9 +562,22 @@ class Postn extends Model {
             return implode(', ', $tags);
         }
     }
+
+    public function getNext()
+    {
+        $pd = new PostnDAO;
+        return $pd->getNext($this->origin, $this->node, $this->nodeid);
+    }
+
+    public function getPrevious()
+    {
+        $pd = new PostnDAO;
+        return $pd->getPrevious($this->origin, $this->node, $this->nodeid);
+    }
 }
 
-class ContactPostn extends Postn {
+class ContactPostn extends Postn
+{
     public $jid;
 
     public $fn;
@@ -552,8 +590,9 @@ class ContactPostn extends Postn {
 
     public $nickname;
 
-    function getContact() {
-        $c = new Contact();
+    function getContact()
+    {
+        $c = new Contact;
         $c->jid = $this->aid;
         $c->fn = $this->fn;
         $c->name = $this->name;

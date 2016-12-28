@@ -2,32 +2,24 @@
 
 namespace modl;
 
-class Caps extends Model {
+class Caps extends Model
+{
     public $node;
     public $category;
     public $type;
     public $name;
     public $features;
 
-    public function __construct() {
-        $this->_struct = '
-        {
-            "node" :
-                {"type":"string", "size":128, "key":true },
-            "category" :
-                {"type":"string", "size":16, "mandatory":true },
-            "type" :
-                {"type":"string", "size":16, "mandatory":true },
-            "name" :
-                {"type":"string", "size":128, "mandatory":true },
-            "features" :
-                {"type":"text", "mandatory":true }
-        }';
+    public $_struct = [
+        'node'      => ['type' => 'string','size' => 128,'key' => true],
+        'category'  => ['type' => 'string','size' => 16,'mandatory' => true],
+        'type'      => ['type' => 'string','size' => 16,'mandatory' => true],
+        'name'      => ['type' => 'string','size' => 128,'mandatory' => true],
+        'features'  => ['type' => 'serialized','mandatory' => true],
+    ];
 
-        parent::__construct();
-    }
-
-    public function set($query, $node = false) {
+    public function set($query, $node = false)
+    {
         if(!$node)
             $this->node     = (string)$query->query->attributes()->node;
         else
@@ -52,7 +44,29 @@ class Caps extends Model {
                 array_push($fet, (string)$f->attributes()->var);
             }
 
-            $this->features = serialize($fet);
+            $this->features = $fet;
         }
+    }
+
+    public function getPubsubRoles()
+    {
+        $features = $this->features;
+
+        $roles = ['owner', 'none'];
+
+        foreach($features as $feature) {
+            preg_match("/http:\/\/jabber.org\/protocol\/pubsub#(.*)-affiliation$/", $feature, $matches);
+            if(!empty($matches)){
+                array_push($roles, $matches[1]);
+            }
+        }
+
+        return $roles;
+    }
+
+    public function isJingle()
+    {
+        $features = $this->features;
+        return (in_array('http://jabber.org/protocol/jingle', $features));
     }
 }

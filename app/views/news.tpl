@@ -1,4 +1,6 @@
 <?php $this->widget('Init');?>
+<?php $this->widget('VisioLink');?>
+<?php $this->widget('Notification');?>
 <?php $this->widget('Upload');?>
 <?php $this->widget('Search');?>
 
@@ -8,9 +10,11 @@
 </nav>
 
 <main>
-    <section>
+    <section style="background-color: #EEE;">
+        <aside>
+            <?php $this->widget('Notifs');?>
+            <?php $this->widget('NewsNav');?>
+        </aside>
         <?php $this->widget('Menu');?>
-        <?php $this->widget('Post');?>
-        <?php $this->widget('Publish');?>
     </section>
 </main>

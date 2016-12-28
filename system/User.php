@@ -1,6 +1,7 @@
 <?php
 
-class User {
+class User
+{
     public  $username = '';
     private $config = [];
 
@@ -50,7 +51,7 @@ class User {
 
             $cd = new modl\CapsDAO;
             $caps = $cd->get($session->host);
-            $this->caps = unserialize($caps->features);
+            $this->caps = $caps->features;
         }
     }
 
@@ -123,11 +124,10 @@ class User {
     function isSupported($key)
     {
         $this->reload();
-
         if($this->caps != null) {
             switch($key) {
                 case 'pubsub':
-                    return in_array('http://jabber.org/protocol/pubsub#publish', $this->caps);
+                    return in_array('http://jabber.org/protocol/pubsub#persistent-items', $this->caps);
                     break;
                 case 'upload':
                     $id = new \Modl\ItemDAO;

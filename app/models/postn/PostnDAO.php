@@ -1,9 +1,11 @@
 <?php
 
-namespace modl;
+namespace Modl;
 
-class PostnDAO extends SQL {
-    function set(Postn $post) {
+class PostnDAO extends SQL
+{
+    function set(Postn $post)
+    {
         $this->_sql = '
             update postn
                 set aname           = :aname,
@@ -40,7 +42,7 @@ class PostnDAO extends SQL {
 
         $this->prepare(
             'Postn',
-            array(
+            [
                 'aname'             => $post->aname,
                 'aid'               => $post->aid,
                 'aemail'            => $post->aemail,
@@ -72,7 +74,7 @@ class PostnDAO extends SQL {
                 'origin'            => $post->origin,
                 'node'              => $post->node,
                 'nodeid'            => $post->nodeid
-            )
+            ]
         );
 
         $this->run('Postn');
@@ -148,7 +150,7 @@ class PostnDAO extends SQL {
 
             $this->prepare(
                 'Postn',
-                array(
+                [
                     'aname'             => $post->aname,
                     'aid'               => $post->aid,
                     'aemail'            => $post->aemail,
@@ -180,14 +182,105 @@ class PostnDAO extends SQL {
                     'origin'            => $post->origin,
                     'node'              => $post->node,
                     'nodeid'            => $post->nodeid
-                )
+                ]
             );
 
             $this->run('Postn');
         }
     }
 
-    function get($origin, $node, $nodeid, $public = false) {
+    function get($origin, $node, $nodeid, $public = false, $around = false)
+    {
+        $params = [
+                'origin' => $origin,
+                'node' => $node,
+                'nodeid' => $nodeid
+            ];
+
+        $this->_sql = '
+            select postn.*, contact.*, postn.aid from postn
+            left outer join contact on postn.aid = contact.jid
+            left outer join item
+                on postn.origin = item.server
+                and postn.node = item.node
+            where postn.origin = :origin
+                and postn.node = :node';
+
+        if(!$around) {
+            $this->_sql .= ' and postn.nodeid = :nodeid';
+        } else {
+            $compare = ($around == 1) ? '>' : '<';
+            $order   = ($around == 1) ? 'asc' : 'desc';
+            $this->_sql .= ' and postn.nodeid = (
+                    select nodeid
+                    from postn
+                    where published '. $compare .' (
+                        select published
+                        from postn
+                        where postn.origin = :origin
+                            and postn.node = :node
+                            and postn.nodeid = :nodeid
+                    )
+                    and postn.origin = :origin
+                    and postn.node = :node
+                    and (
+                        (
+                            postn.origin in (
+                                select jid
+                                from rosterlink
+                                where session = :jid
+                                and rostersubscription in (\'both\', \'to\')
+                            )
+                            and node = \'urn:xmpp:microblog:0\'
+                        )
+                        or (
+                            postn.origin = :jid
+                            and node = \'urn:xmpp:microblog:0\'
+                        )
+                        or (
+                            (postn.origin, node) in (
+                                select server, node
+                                from subscription
+                                where jid = :jid)
+                        )
+                        or postn.open = true
+                    )
+                    order by published '.$order.'
+                    limit 1
+                )
+                ';
+
+            $params['contact.jid'] = $this->_user;
+        }
+
+        if($public) $this->_sql .= ' and postn.open = true';
+
+        $this->prepare(
+            'Postn',
+            $params
+        );
+
+        return $this->run('ContactPostn', 'item');
+    }
+
+    function getNext($origin, $node, $nodeid, $public = false)
+    {
+        return $this->get($origin, $node, $nodeid, $public, 1);
+    }
+
+    function getPrevious($origin, $node, $nodeid, $public = false)
+    {
+        return $this->get($origin, $node, $nodeid, $public, 2);
+    }
+
+    function getPublicItem($origin, $node, $nodeid)
+    {
+        return $this->get($origin, $node, $nodeid, true);
+    }
+
+    function getIds($origin, $node, $nodeids)
+    {
+        $ids = (!empty($nodeids)) ? implode('\',\'', $nodeids) : '';
         $this->_sql = '
             select postn.*, contact.*, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -196,27 +289,23 @@ class PostnDAO extends SQL {
                 and postn.node = item.node
             where postn.origin = :origin
                 and postn.node = :node
-                and postn.nodeid = :nodeid';
+                and postn.nodeid in (\''.$ids.'\')
+            order by published';
 
-        if($public) $this->_sql .= ' and postn.open = true';
 
         $this->prepare(
             'Postn',
             [
                 'origin' => $origin,
-                'node' => $node,
-                'nodeid' => $nodeid,
+                'node' => $node
             ]
         );
 
-        return $this->run('ContactPostn', 'item');
+        return $this->run('ContactPostn');
     }
 
-    function getPublicItem($origin, $node, $nodeid) {
-        return $this->get($origin, $node, $nodeid, true);
-    }
-
-    function delete($nodeid) {
+    function delete($nodeid)
+    {
         $this->_sql = '
             delete from postn
             where nodeid = :nodeid';
@@ -231,7 +320,8 @@ class PostnDAO extends SQL {
         return $this->run('Postn');
     }
 
-    function deleteNode($origin, $node) {
+    function deleteNode($origin, $node)
+    {
         $this->_sql = '
             delete from postn
             where origin = :origin
@@ -248,7 +338,8 @@ class PostnDAO extends SQL {
         return $this->run('Postn');
     }
 
-    function getNode($from, $node, $limitf = false, $limitr = false) {
+    function getNode($from, $node, $limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -276,7 +367,8 @@ class PostnDAO extends SQL {
         return $this->run('ContactPostn');
     }
 
-    function getNodeUnfiltered($from, $node, $limitf = false, $limitr = false) {
+    function getNodeUnfiltered($from, $node, $limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -301,7 +393,8 @@ class PostnDAO extends SQL {
         return $this->run('ContactPostn');
     }
 
-    function getPublicTag($tag, $limitf = false, $limitr = false) {
+    function getPublicTag($tag, $limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -322,7 +415,8 @@ class PostnDAO extends SQL {
         return $this->run('ContactPostn');
     }
 
-    function getGallery($from, $limitf = false, $limitr = false) {
+    function getGallery($from, $limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -365,7 +459,8 @@ class PostnDAO extends SQL {
         return $this->run('Postn', 'item');
     }
 
-    function getAllPosts($jid = false, $limitf = false, $limitr = false) {
+    function getAllPosts($jid = false, $limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -395,7 +490,8 @@ class PostnDAO extends SQL {
         return $this->run('ContactPostn');
     }
 
-    function getFeed($limitf = false, $limitr = false) {
+    function getFeed($limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -419,7 +515,8 @@ class PostnDAO extends SQL {
         return $this->run('ContactPostn');
     }
 
-    function getNews($limitf = false, $limitr = false) {
+    function getNews($limitf = false, $limitr = false)
+    {
         $this->_sql = '
             select *, postn.aid from postn
             left outer join contact on postn.aid = contact.jid
@@ -488,7 +585,8 @@ class PostnDAO extends SQL {
     }
 
     // TODO: fixme
-    function getComments($posts) {
+    function getComments($posts)
+    {
         $commentsid = '';
         if(is_array($posts)) {
             $i = 0;
@@ -523,13 +621,41 @@ class PostnDAO extends SQL {
         $this->_sql = '
             select count(*) from postn
             where origin = :origin
-                and node = :node';
+                and node = :node
+                and (title != \'\'
+                or contentraw != \'\')
+                and contentraw != :contentraw';
 
         $this->prepare(
             'Postn',
             [
                 'origin' => $origin,
-                'node'   => 'urn:xmpp:microblog:0:comments/'.$id
+                'node'   => 'urn:xmpp:microblog:0:comments/'.$id,
+                'contentraw' => '♥'
+            ]
+        );
+
+        $arr = $this->run(null, 'array');
+        if(is_array($arr) && isset($arr[0])) {
+            $arr = array_values($arr[0]);
+            return (int)$arr[0];
+        }
+    }
+
+    function countLikes($origin, $id)
+    {
+        $this->_sql = '
+            select count(*) from postn
+            where origin = :origin
+                and node = :node
+                and contentraw = :contentraw';
+
+        $this->prepare(
+            'Postn',
+            [
+                'origin' => $origin,
+                'node'   => 'urn:xmpp:microblog:0:comments/'.$id,
+                'contentraw' => '♥'
             ]
         );
 
@@ -555,7 +681,8 @@ class PostnDAO extends SQL {
         return $this->run('Postn');
     }
 
-    function getCountSince($date) {
+    function getCountSince($date)
+    {
         $this->_sql = '
             select count(*) from postn
             where (
@@ -583,7 +710,35 @@ class PostnDAO extends SQL {
         }
     }
 
-    function getLastDate() {
+    function getNotifsSince($date, $limitf = false, $limitr = false)
+    {
+        $this->_sql = '
+            select * from postn
+            left outer join contact on postn.aid = contact.jid
+            where origin = :origin
+            and commentnodeid is null
+            and node != \'urn:xmpp:microblog:0\'
+            and published > :published
+            order by published desc
+                ';
+
+        if($limitr) {
+            $this->_sql = $this->_sql.' limit '.$limitr.' offset '.$limitf;
+        }
+
+        $this->prepare(
+            'Postn',
+            [
+                'origin' => $this->_user,
+                'published' => $date
+            ]
+        );
+
+        return $this->run('ContactPostn');
+    }
+
+    function getLastDate()
+    {
         $this->_sql = '
             select published from postn
             where (
@@ -608,7 +763,7 @@ class PostnDAO extends SQL {
             return $arr[0]['published'];
     }
 
-    function getLastPublished($limitf = false, $limitr = false)
+    function getLastPublished($origin = false, $limitf = false, $limitr = false)
     {
         $this->_sql = '
             select * from postn
@@ -619,37 +774,81 @@ class PostnDAO extends SQL {
                 and postn.node not like \'urn:xmpp:microblog:0:comments/%\'
                 and postn.node not like \'urn:xmpp:inbox\'
                 and postn.origin not like \'nsfw%\'
-                and ((postn.origin, postn.node) not in (select server, node from subscription where jid = :origin))
+                and (
+                    (postn.origin, postn.node) not in
+                    (select server, node
+                        from subscription
+                        where subscription.jid = :jid
+                    )
+                )
+                and aid is not null';
+
+        if($origin) {
+            $this->_sql .= '
+                and origin = :origin
+            ';
+        }
+
+        $this->_sql .= '
             order by published desc
             ';
 
-        if($limitr)
-            $this->_sql = $this->_sql.' limit '.$limitr.' offset '.$limitf;
+        if($limitr) {
+            $this->_sql .= ' limit '.$limitr.' offset '.$limitf;
+        }
 
-        $this->prepare(
-            'Postn',
-            [
-                'origin' => $this->_user
-            ]
-        );
+        if($origin) {
+            $this->prepare(
+                'Postn',
+                [
+                    'origin' => $origin,
+                    'subscription.jid' => $this->_user
+                ]
+            );
+        } else {
+            $this->prepare('Postn', ['subscription.jid' => $this->_user]);
+        }
 
         return $this->run('Postn');
     }
 
     function getLastBlogPublic($limitf = false, $limitr = false)
     {
-        $this->_sql = '
-            select * from postn
-            left outer join contact on postn.aid = contact.jid
-            where
-                node = \'urn:xmpp:microblog:0\'
-                and postn.origin not in (select jid from rosterlink where session = :origin)
-                and postn.open = true
-            order by published desc
-            ';
+        switch($this->_dbtype) {
+            case 'mysql':
+                $this->_sql = '
+                    select * from postn
+                    left outer join contact on postn.aid = contact.jid
+                    where
+                        node = \'urn:xmpp:microblog:0\'
+                        and postn.origin not in (select jid from rosterlink where session = :origin)
+                        and postn.open = true
+                        and content != \'\'
+                    group by origin
+                    order by published desc
+                    ';
 
-        if($limitr)
-            $this->_sql = $this->_sql.' limit '.$limitr.' offset '.$limitf;
+                if($limitr)
+                    $this->_sql = $this->_sql.' limit '.$limitr.' offset '.$limitf;
+            break;
+            case 'pgsql':
+                $this->_sql = '
+                    select * from (
+                        select distinct on (origin) * from postn
+                        left outer join contact on postn.aid = contact.jid
+                        where
+                            node = \'urn:xmpp:microblog:0\'
+                            and postn.origin not in (select jid from rosterlink where session = :origin)
+                            and postn.open = true
+                            and content != \'\'
+                    ) p
+                    order by published desc
+                    ';
+
+                if($limitr)
+                    $this->_sql = $this->_sql.' limit '.$limitr.' offset '.$limitf;
+            break;
+        }
 
         $this->prepare(
             'Postn',

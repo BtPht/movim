@@ -9,6 +9,7 @@
         <div>
             <input
                 {if="isset($room)"}value="{$room->conference}" disabled{/if}
+                {if="isset($id)"}value="{$id}" disabled{/if}
                 name="jid"
                 {if="isset($server)"}
                     placeholder="chatroom@{$server}"
@@ -29,8 +30,8 @@
         </div>
         <div>
             <input
-                {if="isset($room) && !empty($room->username)"}
-                    value="{$room->conference}"
+                {if="isset($room) && $room->nick != ''"}
+                    value="{$room->nick}"
                 {else}
                     value="{$username}"
                 {/if}
@@ -50,7 +51,7 @@
     </section>
     <div>
         <a class="button flat" onclick="Dialog_ajaxClear()">
-            {$c->__('button.close')}
+            {$c->__('button.cancel')}
         </a>
         {if="isset($room)"}
             <a

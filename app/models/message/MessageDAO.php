@@ -2,8 +2,10 @@
 
 namespace modl;
 
-class MessageDAO extends SQL {
-    function set(Message $message) {
+class MessageDAO extends SQL
+{
+    function set(Message $message)
+    {
         $this->_sql = '
             update message
                 set id              = :thread,
@@ -12,7 +14,8 @@ class MessageDAO extends SQL {
                     published       = :published,
                     delivered       = :delivered,
                     edited          = :edited,
-                    picture         = :picture
+                    picture         = :picture,
+                    quoted          = :quoted
 
                 where session       = :session
                     and id          = :id
@@ -21,19 +24,20 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'thread'    => $message->newid, // FIXME
                 'id'        => $message->id,
                 'session'   => $message->session,
                 'jidto'     => $message->jidto,
                 'edited'    => $message->edited,
                 'picture'   => $message->picture,
+                'quoted'    => $message->quoted,
                 'jidfrom'   => $message->jidfrom,
                 'body'      => $message->body,
                 'html'      => $message->html,
                 'published' => $message->published,
                 'delivered' => $message->delivered
-            )
+            ]
         );
 
         $this->run('Message');
@@ -55,7 +59,8 @@ class MessageDAO extends SQL {
                 published,
                 delivered,
                 sticker,
-                picture)
+                picture,
+                quoted)
                 values(
                     :id,
                     :session,
@@ -70,12 +75,13 @@ class MessageDAO extends SQL {
                     :published,
                     :delivered,
                     :sticker,
-                    :picture
+                    :picture,
+                    :quoted
                     )';
 
             $this->prepare(
                 'Message',
-                array(
+                [
                     'id'        => $message->id,
                     'session'   => $message->session,
                     'jidto'     => $message->jidto,
@@ -89,8 +95,9 @@ class MessageDAO extends SQL {
                     'published' => $message->published,
                     'delivered' => $message->delivered,
                     'sticker'   => $message->sticker,
-                    'picture'   => $message->picture
-                )
+                    'picture'   => $message->picture,
+                    'quoted'    => $message->quoted
+                ]
             );
         }
 
@@ -107,10 +114,10 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'session' => $this->_user,
                 'id' => $id
-            )
+            ]
         );
 
         return $this->run('Message', 'item');
@@ -128,11 +135,11 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'session' => $this->_user,
                 'jidto'   => $to,
                 'jidfrom' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Message', 'item');
@@ -173,11 +180,11 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+             [
                 'session' => $this->_user,
                 'jidfrom' => $jid,
                 'jidto' => $jid
-            )
+            ]
         );
 
         return $this->run('Message');
@@ -198,11 +205,11 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'session' => $this->_user,
                 'jidfrom' => $jid,
                 'jidto' => $jid
-            )
+            ]
         );
 
         return $this->run('Message');
@@ -217,17 +224,18 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'jidfrom'   => $jid,
                 'jidto'     => $jid,
                 'session' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Message');
     }
 
-    function getHistory($jid, $date, $limit = 30) {
+    function getHistory($jid, $date, $limit = 30)
+    {
         $this->_sql = '
             select * from message
             where session = :session
@@ -240,18 +248,19 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'session' => $this->_user,
                 'jidfrom' => $jid,
                 'jidto' => $jid,
-                'published' => $date
-            )
+                'published' => date(SQL::SQL_DATE, strtotime($date))
+            ]
         );
 
         return $this->run('Message');
     }
 
-    function getRoomSubject($room) {
+    function getRoomSubject($room)
+    {
         $this->_sql = '
             select * from message
             where jidfrom = :jidfrom
@@ -261,24 +270,25 @@ class MessageDAO extends SQL {
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'jidfrom'   => $room
-            )
+            ]
         );
 
         return $this->run('Message', 'item');
     }
 
-    function clearMessage() {
+    function clearMessage()
+    {
         $this->_sql = '
             delete from message
             where session = :session';
 
         $this->prepare(
             'Message',
-            array(
+            [
                 'session' => $this->_user
-            )
+            ]
         );
 
         return $this->run('Message');

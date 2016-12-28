@@ -1,6 +1,7 @@
 #
 # Translators:
 # Bikalkas <vicalcas@gmail.com.com>, 2015
+# kosciuk <nhk.web@gmail.com>, 2016
 # Raúl <gomezromanr@gmail.com>, 2015
 # Xals Xaloc <33xaloc@gmail.com>, 2016
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
@@ -24,9 +25,25 @@
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
 #. extracted from ../app/widgets/Blog/locales.ini
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/Bookmark/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
 #. extracted from ../app/widgets/Chat/locales.ini
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
 #. extracted from ../app/widgets/Chats/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/Communities/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunitiesServer/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunityAffiliations/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunityData/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunityHeader/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunityPosts/locales.ini
+#. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
+#. extracted from ../app/widgets/CommunitySubscriptions/locales.ini
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
 #. extracted from ../app/widgets/Config/locales.ini
 #. #-#-#-#-#  locales.po (PACKAGE VERSION)  #-#-#-#-#
@@ -79,8 +96,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: movim\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-24 23:28+0200\n"
-"PO-Revision-Date: 2016-07-29 20:30+0000\n"
+"POT-Creation-Date: 2016-12-11 17:28+0200\n"
+"PO-Revision-Date: 2016-11-06 11:15+0000\n"
 "Last-Translator: Jaussoin Timothée <edhelas@movim.eu>\n"
 "Language-Team: Spanish (http://www.transifex.com/movim/movim/language/es/)\n"
 "Language: es\n"
@@ -205,7 +222,7 @@ msgstr "El registro en este servidor no está disponible en este momento"
 
 #: [error]forbidden
 msgid "Registration forbidden"
-msgstr ""
+msgstr "Registro prohibido"
 
 #: [oob]about
 msgid "This server use an external system for the registration, please click on the following URL."
@@ -253,7 +270,7 @@ msgstr "Puerto"
 
 #: [db]name
 msgid "Database Name"
-msgstr ""
+msgstr "Nombre de la base de datos"
 
 #: [admin]general
 msgid "General Settings"
@@ -351,19 +368,19 @@ msgstr "Mensaje de información"
 
 #: [xmpp]title
 msgid "Default XMPP server"
-msgstr ""
+msgstr "Servidor XMPP predeterminado"
 
 #: [xmpp]domain
 msgid "Main XMPP server domain"
-msgstr ""
+msgstr "Dominio del servidor XMPP principal"
 
 #: [xmpp]description
 msgid "Main XMPP server description"
-msgstr ""
+msgstr "Descripción del servidor XMPP principal"
 
 #: [xmpp]country
 msgid "Main XMPP server country"
-msgstr ""
+msgstr "País del servidor XMPP principal"
 
 #: [log]empty
 msgid "Empty"
@@ -406,7 +423,8 @@ msgid "Install the php5-gd library"
 msgstr "Instalar la librería php5-gd"
 
 #: [compatibility]rights
-msgid "Read and write rights for the webserver in Movims root directory"
+#, fuzzy
+msgid "Read and write rights for the webserver in Movim's %s directory"
 msgstr "Derechos de lectura y escritura para el servidor web en el directorio raíz de Movim"
 
 #: [compatibility]db
@@ -495,7 +513,7 @@ msgstr "Avatar no actualizado"
 
 #: [avatar]missing
 msgid "No avatar defined yet"
-msgstr ""
+msgstr "Aún no se definió un avatar"
 
 #: [blog]title [feed]title
 msgid "%s's feed"
@@ -507,7 +525,75 @@ msgstr "Este usuario no ha publicado nada ahora mismo"
 
 #: [blog]private
 msgid "This content is private, please login to see it"
+msgstr "Este contenido es privado, ingresa para verlo"
+
+#: [title]conferences
+#, fuzzy
+msgid "Conferences"
+msgstr "Visio-conferencia"
+
+#: [title]groups [group]empty_title [page]groups
+msgid "Groups"
+msgstr "Grupos"
+
+#: [chatroom]add
+#, fuzzy
+msgid "Add a new Chat Room"
+msgstr "Añadir una sala de conversación"
+
+#: [chatroom]id [chatrooms]id
+msgid "Chat Room ID"
+msgstr "Id. de la sala de chat"
+
+#: [chatroom]name
+#, fuzzy
+msgctxt "[chatroom]name"
+msgid "Name"
+msgstr "Nombre"
+
+#: [chatroom]nickname [general]nickname [chatrooms]nickname
+#: [accounts]accounts_nickname
+msgid "Nickname"
+msgstr "Apodo"
+
+#: [chatroom]autojoin_label
+msgid "Do you want do join automaticaly this Chat Room ?"
 msgstr ""
+
+#: [chatroom]bad_id [chatrooms]bad_id
+msgid "Bad Chatroom ID"
+msgstr "ID de la Chatroom incorrecto"
+
+#: [chatroom]empty_name [chatrooms]empty_name
+msgid "Empty name"
+msgstr "Nombre vacío"
+
+#: [bookmarks]updated
+msgid "Bookmarks updated"
+msgstr "Marcadores actualizados"
+
+#: [bookmarks]error
+msgid "An error occured :"
+msgstr ""
+
+#: [bookmarks]configure
+#, fuzzy
+msgid "Configure"
+msgstr "Configuración"
+
+#: [url]add
+msgid "Add a new URL"
+msgstr ""
+
+#: [url]url
+msgid "URL"
+msgstr ""
+
+#: [url]name
+#, fuzzy
+msgctxt "[url]name"
+msgid "Name"
+msgstr "Nombre"
 
 #: [message]published
 msgid "Message Published"
@@ -531,7 +617,7 @@ msgstr "Contacto perdido"
 
 #: [message]history
 msgid "%s messages retrieved"
-msgstr ""
+msgstr "%s mensajes obtenidos"
 
 #: [chat]attention
 msgid "%s needs your attention"
@@ -569,11 +655,12 @@ msgstr "Conectado a la sala de chat"
 msgid "Disconnected from the chatroom"
 msgstr "Desconectado de la sala de chat"
 
-#: [chatroom]config [group]configuration [page]configuration
+#: [chatroom]config [communityaffiliation]configuration [group]configuration
+#: [page]configuration
 msgid "Configuration"
 msgstr "Configuración"
 
-#: [chatroom]config_saved
+#: [chatroom]config_saved [communityaffiliation]config_saved
 msgid "Configuration saved"
 msgstr "Configuración guardada"
 
@@ -607,7 +694,140 @@ msgstr "Cargar más contactos"
 
 #: [button]new
 msgid "New conversation"
+msgstr "Nueva conversación"
+
+#: [communities]empty_text [group]empty_text
+msgid "Discover, follow and share"
+msgstr "Descubre, sigue y comparte"
+
+#: [communities]counter
+msgid "%s communities"
 msgstr ""
+
+#: [communities]search_server [group]search_server
+msgid "Search for a new server"
+msgstr "Busca un nuevo Servidor"
+
+#: [communities]servers
+#, fuzzy
+msgid "Communities servers"
+msgstr "Grupo de Servidores"
+
+#: [communities]disco_error [groups]disco_error
+msgid "This server doesn't exists"
+msgstr "Este servidor no existe"
+
+#: [communitiesserver]created [groups]created
+msgid "Group created successfully"
+msgstr "Grupo creado exitosamente"
+
+#: [communitiesserver]empty_server
+msgid "There is no Groups yet on this server."
+msgstr "Aún no hay Grupos en este servidor."
+
+#: [communitiesserver]add [groups]add
+msgid "Create a new Group on %s"
+msgstr "Crear un nuevo Grupo en %s"
+
+#: [communitiesserver]name [groups]name
+msgid "Group name"
+msgstr "Nombre del grupo"
+
+#: [communitiesserver]name_example [groups]name_example
+msgid "My Little Pony - Fan Club"
+msgstr "Mi pequeño pony - Club de fans"
+
+#: [communitiesserver]name_error [groups]name_error
+msgid "Please provide a valid group name (4 characters minimum)"
+msgstr "Por favor, proporciones un nombre de grupo válido (4 carácteres mínimo)"
+
+#: [communitiesserver]no_creation [groups]no_creation
+msgid "You cannot create a new Group on this server"
+msgstr "No puedes crear un nuevo grupo en este servidor"
+
+#: [communityaffiliation]subscriptions [group]subscriptions
+#: [statistics]subscriptions
+msgid "Subscriptions"
+msgstr "Suscripciones"
+
+#: [communityaffiliation]deleted [groups]deleted
+msgid "Group deleted successfully"
+msgstr "Grupo eliminado exitosamente"
+
+#: [communityaffiliation]delete_title [group]delete_title
+msgid "Delete the group"
+msgstr "Borrar grupo"
+
+#: [communityaffiliation]delete_text [group]delete_text
+msgid "You are going to delete the following group. Please confirm your action."
+msgstr "Va a eliminar el siguiente grupo. Por favor, confirme su acción"
+
+#: [communityaffiliation]delete_clean_text [group]delete_clean_text
+msgid "It seems that this group doesn't exists anymore. Do you want to remove it from your subscriptions?"
+msgstr "Parece que este grupo ya no existe. ¿Quieres eliminarlo de tus suscripciones?"
+
+#: [communitydata]sub [groups]sub
+msgid "%s subscribers"
+msgstr "%s suscriptores"
+
+#: [communitydata]num [groups]num
+msgid "%s posts"
+msgstr "%s publicaciones"
+
+#: [communityheader]subscribe [group]subscribe
+msgid "Subscribe"
+msgstr "Suscribirse"
+
+#: [communityheader]unsubscribe [group]unsubscribe
+msgid "Unsubscribe"
+msgstr "Desuscribirse"
+
+#: [communityheader]label_label
+#, fuzzy
+msgid "Give a label for this community"
+msgstr "Establecer una etiqueta para este grupo"
+
+#: [communityheader]label_placeholder
+msgid "My Community Name"
+msgstr ""
+
+#: [communityheader]share_subscription
+#, fuzzy
+msgid "Share this subscription publicly"
+msgstr "Hacer pública esta publicación?"
+
+#: [communityheader]share_subscription_text
+msgid "It will appear on your profile"
+msgstr ""
+
+#: [communityheader]unsubscribe_text
+#, fuzzy
+msgid "You are going to unsubscribe from this community"
+msgstr "Vas a desuscribirte de este grupo"
+
+#: [communityheader]sure [group]sure
+msgid "Are you sure ?"
+msgstr "¿Estás seguro?"
+
+#: [communityposts]empty
+msgid "This community seems empty"
+msgstr ""
+
+#: [communitysubscriptions]subscriptions [groups]subscriptions
+msgid "My Subscriptions"
+msgstr "Mis suscripciones"
+
+#: [communitysubscriptions]empty_title [groups]empty_title
+msgid "Hello"
+msgstr "Hola"
+
+#: [communitysubscriptions]empty_text1 [groups]empty_text1
+msgid "Here you will be able to manage all your subscriptions."
+msgstr "Aquí seras capaz de gestionar todas tus subscripciones"
+
+#: [communitysubscriptions]empty_text2 [groups]empty_text2
+msgid "You don't have any group subscriptions yet."
+msgstr "No te has suscrito a un grupo todavía"
 
 #: [config]general
 msgid "General"
@@ -635,7 +855,7 @@ msgstr "Aspecto"
 
 #: [config]not_valid
 msgid "Configuration invalid"
-msgstr ""
+msgstr "Configuración inválida"
 
 #: [config]advanced
 msgid "Advanced Configuration"
@@ -660,10 +880,6 @@ msgstr "Informaciones generales"
 #: [general]name [chatrooms]name
 msgid "Name"
 msgstr "Nombre"
-
-#: [general]nickname [chatrooms]nickname [accounts]accounts_nickname
-msgid "Nickname"
-msgstr "Apodo"
 
 #: [general]date_of_birth
 msgid "Date of Birth"
@@ -749,10 +965,6 @@ msgstr "Apodo"
 msgid "Group"
 msgstr "Grupo"
 
-#: [edit]updated [roster]updated
-msgid "Contact updated"
-msgstr "Contacto actualizado"
-
 #: [delete]title
 msgid "Are you sure?"
 msgstr "¿Está seguro?"
@@ -771,7 +983,7 @@ msgstr "Último post público"
 
 #: [blog]visit
 msgid "Visit the blog to see all the public posts"
-msgstr ""
+msgstr "Visitá el blog para ver todas las publicaciones públicas"
 
 #: [subscription]to
 msgid "You can see this contact status"
@@ -809,17 +1021,9 @@ msgstr "Invitar"
 msgid "This contact is in your contact list but there is no subscriptions between the two accounts"
 msgstr "Este contacto está en tu lista de contactos pero no hay suscripciones entre las dos cuentas"
 
-#: [group]subscribe
-msgid "Subscribe"
-msgstr "Suscribirse"
-
 #: [group]subscribed
 msgid "Subscribed"
 msgstr "Suscrito"
-
-#: [group]unsubscribe
-msgid "Unsubscribe"
-msgstr "Desuscribirse"
 
 #: [group]unsubscribe_text
 msgid "You are going to unsubscribe from this Group"
@@ -837,18 +1041,6 @@ msgstr "Hacer la membresía a este grupo pública a tus amigos"
 msgid "Give a label for this group"
 msgstr "Establecer una etiqueta para este grupo"
 
-#: [group]sure
-msgid "Are you sure ?"
-msgstr "¿Estás seguro?"
-
-#: [group]empty_title [menu]groups [page]groups
-msgid "Groups"
-msgstr "Grupos"
-
-#: [group]empty_text
-msgid "Discover, follow and share"
-msgstr "Descubre, sigue y comparte"
-
 #: [group]empty
 msgid "Something bad happened to this group"
 msgstr "Algo malo le ocurrió a este grupo"
@@ -857,33 +1049,13 @@ msgstr "Algo malo le ocurrió a este grupo"
 msgid "Group configuration saved"
 msgstr "Configuración de grupo guardada"
 
-#: [group]delete_title
-msgid "Delete the group"
-msgstr "Borrar grupo"
-
-#: [group]delete_text
-msgid "You are going to delete the following group. Please confirm your action."
-msgstr "Va a eliminar el siguiente grupo. Por favor, confirme su acción"
-
-#: [group]delete_clean_text
-msgid "It seems that this group doesn't exists anymore. Do you want to remove it from your subscriptions?"
-msgstr "Parece que este grupo ya no existe. ¿Quieres eliminarlo de tus suscripciones?"
-
 #: [group]counter
 msgid "%s groups on this server"
 msgstr "%s grupos en este servidor"
 
-#: [group]subscriptions [statistics]subscriptions
-msgid "Subscriptions"
-msgstr "Suscripciones"
-
 #: [group]servers
 msgid "Groups servers"
 msgstr "Grupo de Servidores"
-
-#: [group]search_server
-msgid "Search for a new server"
-msgstr "Busca un nuevo Servidor"
 
 #: [group]help_info1
 msgid "Groups are the perfect way to share posts about topics that you like with all the other Movim's users."
@@ -901,70 +1073,9 @@ msgstr "¿Has Terminado? Puedes publicar un nuevo post en el Grupo usando el bot
 msgid "You will find a list of all your subscribed Groups in My Subscriptions and receive instantly all the new incoming posts in the %sNews%s page."
 msgstr "Encontrarás una lista con todos los Grupos a los que te has suscrito en Tus Subscripciones y recibe instantáneamente todos los nuevos poste en la página de novedades"
 
-#: [groups]empty_title
-msgid "Hello"
-msgstr "Hola"
-
 #: [groups]contact_post [menu]contact_post [hello]contact_post
 msgid "Contact post"
 msgstr "Publicación de contacto"
-
-#: [groups]empty_text1
-msgid "Here you will be able to manage all your subscriptions."
-msgstr "Aquí seras capaz de gestionar todas tus subscripciones"
-
-#: [groups]empty_text2
-msgid "You don't have any group subscriptions yet."
-msgstr "No te has suscrito a un grupo todavía"
-
-#: [groups]empty_server
-#, fuzzy
-msgid "There is no Groups yet on this server."
-msgstr "%s grupos en este servidor"
-
-#: [groups]subscriptions
-msgid "My Subscriptions"
-msgstr "Mis suscripciones"
-
-#: [groups]add
-msgid "Create a new Group on %s"
-msgstr ""
-
-#: [groups]name
-msgid "Group name"
-msgstr "Nombre del grupo"
-
-#: [groups]name_example
-msgid "My Little Pony - Fan Club"
-msgstr "Mi pequeño pony - Club de fans"
-
-#: [groups]created
-msgid "Group created successfully"
-msgstr "Grupo creado exitosamente"
-
-#: [groups]deleted
-msgid "Group deleted successfully"
-msgstr "Grupo eliminado exitosamente"
-
-#: [groups]name_error
-msgid "Please provide a valid group name (4 characters minimum)"
-msgstr "Por favor, proporciones un nombre de grupo válido (4 carácteres mínimo)"
-
-#: [groups]no_creation
-msgid "You cannot create a new Group on this server"
-msgstr "No puedes crear un nuevo grupo en este servidor"
-
-#: [groups]sub
-msgid "%s subscribers"
-msgstr "%s suscriptores"
-
-#: [groups]num
-msgid "%s posts"
-msgstr "%s publicaciones"
-
-#: [groups]disco_error
-msgid "This server doesn't exists"
-msgstr "Este servidor no existe"
 
 #: [help]faq
 msgid "Frequently Asked Questions"
@@ -1082,11 +1193,6 @@ msgstr "Error en la sesión"
 msgid "Account successfully created"
 msgstr "La cuenta ha sido creada exitosamente"
 
-#: [error]xmpp_unauthorized
-msgctxt "[error]xmpp_unauthorized"
-msgid "Your XMPP server is unauthorized"
-msgstr "Tu server XMPP no está autorizado"
-
 #: [error]mec_error
 msgid "The server takes too much time to respond"
 msgstr "El servidor está tardando demasiado en responder"
@@ -1108,13 +1214,9 @@ msgid "Invalid password format"
 msgstr "Formato de contraseña inválido"
 
 #: [error]unauthorized
-msgctxt "[error]unauthorized"
+#, fuzzy
 msgid "Your XMPP server is unauthorized"
 msgstr "Tu server XMPP no está autorizado"
-
-#: [error]conflict
-msgid "A Movim session is already open on an other device"
-msgstr "Una sesión de Movim está abierta en otro dispositivo"
 
 #: [error]wrong_account
 msgid "Movim failed to authenticate. You entered wrong data"
@@ -1161,12 +1263,18 @@ msgid "Bad nickname (between 4 and 40 characters)"
 msgstr "Mal apodo (entre 4 y 40 carácteres)"
 
 #: [menu]empty_title
-msgid "No news yet..."
+#, fuzzy
+msgid "No news yet…"
 msgstr "Sin noticias aún..."
 
 #: [menu]empty
-msgid "Welcome on your news feed, here you will see all the posts published by your contacts and in the groups you have subscribed."
+#, fuzzy
+msgid "Welcome on your news feed, here you will see all the posts published by your contacts and in the communities you have subscribed."
 msgstr "Bienvenido al contenido de tus noticias, aquí verás todos las publicaciones de tus contactos y de los grupos a los que te has suscrito"
+
+#: [menu]discover [button]discover
+msgid "Discover"
+msgstr ""
 
 #: [menu]refresh
 msgid "Refresh all the streams"
@@ -1182,7 +1290,7 @@ msgstr "Todos"
 
 #: [menu]mine
 msgid "My publications"
-msgstr ""
+msgstr "Mis publicaciones"
 
 #: [menu]contacts [page]contacts
 msgid "Contacts"
@@ -1190,7 +1298,7 @@ msgstr "Contactos"
 
 #: [menu]add_post
 msgid "Add a post"
-msgstr ""
+msgstr "Agregar una publicación"
 
 #: [notifs]title
 msgid "Pending Invitations"
@@ -1208,7 +1316,7 @@ msgstr "Contenido de noticias"
 msgid "Discover and register to the groups you are interested in"
 msgstr "Descubre y regístrate en los grupos que te interesan"
 
-#: [post]content [post]content_label
+#: [post]content [publish]content_label
 msgid "Content"
 msgstr "Contenido"
 
@@ -1225,8 +1333,9 @@ msgid "What's Hot"
 msgstr "Qué está de moda"
 
 #: [post]hot_text
-msgid "Posts recently published in Groups that you are not subscribed (yet)"
-msgstr ""
+#, fuzzy
+msgid "Posts recently published in communities that you are not subscribed (yet)"
+msgstr "Publicaciones recientes en Grupos en los que no estás suscripto (aún)"
 
 #: [post]new [publish]new
 msgid "New post"
@@ -1242,19 +1351,19 @@ msgstr "Ver el perfil de %s"
 
 #: [post]blog_last
 msgid "Public posts from users"
-msgstr ""
+msgstr "Publicaciones públicas de usuarios"
 
 #: [post]public
 msgid "Publish this post publicly?"
-msgstr ""
+msgstr "Hacer pública esta publicación?"
 
 #: [post]public_no
 msgid "This post is private"
-msgstr ""
+msgstr "Ésta publicación es privada"
 
 #: [post]public_url
 msgid "Public URL of this post"
-msgstr ""
+msgstr "URL pública de esta publicación"
 
 #: [post]delete_title [post]delete
 msgid "Delete this post"
@@ -1265,7 +1374,12 @@ msgid "You are going to delete this post, please confirm your action"
 msgstr "Vas a eliminar esta publicación, por favor, confirma la acción"
 
 #: [post]discover
-msgid "Discover more articles on the Groups page"
+#, fuzzy
+msgid "Discover more articles on the communities page"
+msgstr "Descubre más artículos en la página de Grupos"
+
+#: [post]more
+msgid "Read more"
 msgstr ""
 
 #: [post]comments_disabled
@@ -1277,9 +1391,8 @@ msgid "Comment published"
 msgstr "Comentario publicado"
 
 #: [post]comment_deleted
-#, fuzzy
 msgid "Comment deleted"
-msgstr "Contacto eliminado"
+msgstr "Comentario borrado"
 
 #: [hello]blog_title
 msgid "Visit your public blog"
@@ -1319,11 +1432,11 @@ msgstr ""
 
 #: [hello]profile_title
 msgid "Looks like you didn't complete your profile yet"
-msgstr ""
+msgstr "Parece como que aún no completaste tu perfil"
 
 #: [hello]profile_paragraph
 msgid "You can go in the Configuration page to describe yourself and put a nice picture"
-msgstr ""
+msgstr "Puedes ir a la página de Configuración para describirte y poner una linda foto"
 
 #: [status]disconnect
 msgid "Disconnect"
@@ -1337,47 +1450,39 @@ msgstr "¡Tu estado aquí!"
 msgid "Status updated"
 msgstr "Estado actualizado"
 
-#: [status]status
-msgid "Status"
-msgstr "Estado"
-
 #: [status]presence
 msgid "Presence"
 msgstr "Presencia"
 
-#: [status]online
-msgid "Online with Movim"
-msgstr "En línea con Movim"
-
-#: [post]preview
+#: [publish]preview
 msgid "Preview"
 msgstr "Vista previa"
 
-#: [post]help [page]help
+#: [publish]help [page]help
 msgid "Help"
 msgstr "Ayuda"
 
-#: [post]help_more
+#: [publish]help_more
 msgid "More help"
 msgstr "Más ayuda"
 
-#: [post]help_manual
+#: [publish]help_manual
 msgid "Markdown syntax manual"
 msgstr "Markdown syntax manual"
 
-#: [post]content_text
+#: [publish]content_text
 msgid "You can format your content using Markdown"
-msgstr ""
+msgstr "Puedes formatear el contenido usando Markdown"
 
-#: [post]link
+#: [publish]link
 msgid "Link"
 msgstr "Enlace"
 
-#: [post]tags
+#: [publish]tags
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: [post]gallery
+#: [publish]gallery
 msgid "This picture will be added to your gallery"
 msgstr "Esta imagen será añadida a tu galería"
 
@@ -1391,19 +1496,19 @@ msgstr "Sin contenido para ver"
 
 #: [publish]no_title
 msgid "Please provide a title"
-msgstr ""
+msgstr "Por favor, agrega un título"
 
 #: [publish]edit
 msgid "Edit post"
-msgstr ""
+msgstr "Editar publicación"
 
-#: [publish]title
+#: [publish]title [page]publish
 msgid "Publish"
 msgstr "Publicar"
 
 #: [publish]attach
 msgid "Add a file or a picture to your post"
-msgstr ""
+msgstr "Agregar un archivo o una foto a tu publicación"
 
 #: [publish]no_publication
 msgid "You cannot publish a post on this Group"
@@ -1415,11 +1520,11 @@ msgstr "Algunos campos han sido rellenados. ¿Seguro que quieres retroceder y pe
 
 #: [publish]add_text
 msgid "Click here to add some text to your publication"
-msgstr ""
+msgstr "Haz click aquí para agregar contenido a tu publicación"
 
 #: [publish]add_text_label
 msgid "Add some text"
-msgstr ""
+msgstr "Agrega algún texto"
 
 #: [rooms]add
 msgid "Add a chatroom"
@@ -1427,7 +1532,7 @@ msgstr "Añadir una sala de conversación"
 
 #: [rooms]edit
 msgid "Edit a chatroom"
-msgstr ""
+msgstr "Editar una sala de chat"
 
 #: [rooms]empty_text1
 msgid "You don't have any chatroom yet."
@@ -1441,21 +1546,9 @@ msgstr ""
 msgid "Chatrooms"
 msgstr "Salas de conversación"
 
-#: [chatrooms]id
-msgid "Chat Room ID"
-msgstr "Id. de la sala de chat"
-
 #: [chatrooms]name_placeholder
 msgid "My Favorite Room"
 msgstr "My sala favorita"
-
-#: [chatrooms]bad_id
-msgid "Bad Chatroom ID"
-msgstr "ID de la Chatroom incorrecto"
-
-#: [chatrooms]empty_name
-msgid "Empty name"
-msgstr "Nombre vacío"
 
 #: [chatrooms]users
 msgid "Users in the room"
@@ -1467,11 +1560,7 @@ msgstr "Por favor, introduzca un nombre correcto (2 a 40 carácteres)"
 
 #: [chatrooms]conflict
 msgid "Username already taken"
-msgstr ""
-
-#: [bookmarks]updated
-msgid "Bookmarks updated"
-msgstr "Marcadores actualizados"
+msgstr "Nombre de usuario en uso"
 
 #: [room]anonymous_title
 msgid "Public chatroom"
@@ -1523,7 +1612,7 @@ msgstr "Por favor, ingresa un Jabber ID válido"
 
 #: [roster]no_contacts_title
 msgid "No contacts ?"
-msgstr ""
+msgstr "Sin contactos?"
 
 #: [roster]no_contacts_text
 msgid "You can add one using the + button below"
@@ -1532,6 +1621,10 @@ msgstr ""
 #: [roster]show_hide
 msgid "Show/Hide"
 msgstr "Mostrar/Ocultar"
+
+#: [roster]add_title
+msgid "Add a contact"
+msgstr ""
 
 #: [roster]add_contact_info1
 msgid "Enter the Jabber ID of your contact."
@@ -1553,6 +1646,10 @@ msgstr "Resultados"
 msgid "Contact added"
 msgstr "Contacto añadido"
 
+#: [roster]updated
+msgid "Contact updated"
+msgstr "Contacto actualizado"
+
 #: [roster]deleted
 msgid "Contact deleted"
 msgstr "Contacto eliminado"
@@ -1563,23 +1660,24 @@ msgstr "Buscar en tus contactos"
 
 #: [roster]search_pod
 msgid "Search a contact"
-msgstr ""
+msgstr "Buscar un contacto"
 
 #: [search]keyword
 msgid "What are you looking for?"
-msgstr ""
+msgstr "¿Qué es lo que buscas?"
 
 #: [search]subtitle
 msgid "Open me using Ctrl + M"
-msgstr ""
+msgstr "Abreme usando Ctrl + M"
 
 #: [share]error
+#, fuzzy
 msgid "This is not a valid url"
-msgstr "Esta no es una dirección válida"
+msgstr "Por favor, introduzca un enlace válido"
 
 #: [share]success
 msgid "Sharing the URL"
-msgstr "Compartiendo el enlace"
+msgstr ""
 
 #: [statistics]title
 msgid "Statistics"
@@ -1627,24 +1725,23 @@ msgstr "No hay contacto especificado"
 
 #: [upload]title
 msgid "Upload a file"
-msgstr ""
+msgstr "Subir un archivo"
 
 #: [upload]choose
 msgid "Choose a file to upload"
-msgstr ""
+msgstr "Elige un archivo a subir"
 
 #: [upload]info
 msgid "Large pictures will be resized and compressed"
-msgstr ""
+msgstr "Las imágenes grandes serán redimensionadas y comprimidas"
 
 #: [upload]error_filesize
 msgid "File too large"
-msgstr ""
+msgstr "Archivo demasiado grande"
 
 #: [upload]error_failed
-#, fuzzy
 msgid "Upload failed"
-msgstr "Subir"
+msgstr "Subida fallida"
 
 #: [vcard]title [page]profile
 msgid "Profile"
@@ -1682,6 +1779,10 @@ msgstr "Skype"
 msgid "Yahoo Account"
 msgstr "Cuenta de Yahoo"
 
+#: [privacy]my_profile
+msgid "Go to my profile page"
+msgstr ""
+
 #: [privacy]privacy_title
 msgid "Privacy Level"
 msgstr "Nivel de privacidad"
@@ -1711,9 +1812,13 @@ msgid "Movim is a kickass distributed social networking platform that protect yo
 msgstr "Movim es una red social distribuida mediante \"kickass\" que protege tu privacidad y que incluye características alucinantes."
 
 #: [global]loading
-#, fuzzy
 msgid "Loading…"
-msgstr "Cargando"
+msgstr "Cargando..."
+
+#: [page]communities
+#, fuzzy
+msgid "Communities"
+msgstr "Comentarios"
 
 #: [page]home
 msgid "Home"
@@ -1742,6 +1847,11 @@ msgstr "Conversaciones"
 #: [page]public_groups
 msgid "Public Groups"
 msgstr "Grupos públicos"
+
+#: [page]post
+#, fuzzy
+msgid "Post"
+msgstr "Publicaciones"
 
 #: [page]blog
 msgid "Blog"
@@ -1776,7 +1886,6 @@ msgid "Pods"
 msgstr "Pods"
 
 #: [page]share
-#, fuzzy
 msgctxt "[page]share"
 msgid "Share"
 msgstr "Compartir"
@@ -1787,7 +1896,7 @@ msgstr "Sala"
 
 #: [page]tag
 msgid "Tag"
-msgstr ""
+msgstr "Etiqueta"
 
 #: [error]error
 msgid "Error: %s"
@@ -1810,12 +1919,17 @@ msgid "Whoops!"
 msgstr "¡Uuups!"
 
 #: [error]websocket
-msgid "Movim cannot talk with the server, please try again later (Websocket connection error)"
+#, fuzzy
+msgid "Movim cannot talk with the server, please try again later"
 msgstr "Movim no puede contactar con el servidor, por favor, inténtelo de nuevo más tarde (error de conexión del Websocket)"
 
 #: [error]oops
 msgid "Oops!"
 msgstr "¡Ups!"
+
+#: [button]call
+msgid "Call"
+msgstr ""
 
 #: [button]validate
 msgid "Validate"
@@ -1883,11 +1997,11 @@ msgstr "Contactando"
 
 #: [button]bool_yes
 msgid "Yes"
-msgstr ""
+msgstr "Si"
 
 #: [button]bool_no
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: [button]return
 msgid "Return"
@@ -1911,10 +2025,9 @@ msgstr "Anterior"
 
 #: [button]search
 msgid "Search"
-msgstr ""
+msgstr "Buscar"
 
 #: [button]share
-#, fuzzy
 msgctxt "[button]share"
 msgid "Share"
 msgstr "Compartir"
@@ -2503,7 +2616,7 @@ msgstr "No hay contenido"
 
 #: [post]no_comments
 msgid "No comments yet"
-msgstr ""
+msgstr "Sin comentarios"
 
 #: [post]no_comments_stream
 msgid "No comments stream"
@@ -2531,7 +2644,7 @@ msgstr "Mostrar los comentarios antiguos"
 
 #: [post]comments_loading
 msgid "Loading comments..."
-msgstr ""
+msgstr "Cargando comentarios..."
 
 #: [post]comments_get
 msgid "Get the comments"
@@ -2569,6 +2682,10 @@ msgstr "Publicación de contacto"
 msgid "Comments"
 msgstr "Comentarios"
 
+#: [post]original_deleted
+msgid "Original post deleted"
+msgstr ""
+
 #: [api]error
 msgid "The API is not reachable, try again later"
 msgstr "La API no se puede alcanzar, inténtalo de nuevo más tarde"
@@ -2577,31 +2694,23 @@ msgstr "La API no se puede alcanzar, inténtalo de nuevo más tarde"
 msgid "Type here"
 msgstr "Escribe aquí"
 
-#~ msgid "Conferences"
-#~ msgstr "Conferencias"
+#~ msgid "Status"
+#~ msgstr "Estado"
 
-#~ msgid "Add a new Chat Room"
-#~ msgstr "Añadir una nueva sala de chat"
+#, fuzzy
+#~ msgid "Read and write rights for the webserver in Movim's cache directory"
+#~ msgstr "Derechos de lectura y escritura para el servidor web en el directorio raíz de Movim"
 
-#~ msgctxt "[chatroom]name"
-#~ msgid "Name"
-#~ msgstr "Nombre"
+#, fuzzy
+#~ msgid "Read and write rights for the webserver in Movim's log directory"
+#~ msgstr "Derechos de lectura y escritura para el servidor web en el directorio raíz de Movim"
 
-#~ msgid "Do you want do join automaticaly this Chat Room ?"
-#~ msgstr "¿Quiere unirse automáticamente a esta sala de chat?"
+#~ msgctxt "[error]unauthorized"
+#~ msgid "Your XMPP server is unauthorized"
+#~ msgstr "Tu server XMPP no está autorizado"
 
-#~ msgid "An error occured :"
-#~ msgstr "Un error ocurrió:"
+#~ msgid "A Movim session is already open on an other device"
+#~ msgstr "Una sesión de Movim está abierta en otro dispositivo"
 
-#~ msgid "Configure"
-#~ msgstr "Configurar"
-
-#~ msgid "Add a new URL"
-#~ msgstr "Añadir nueva URL"
-
-#~ msgid "URL"
-#~ msgstr "URL"
-
-#~ msgctxt "[url]name"
-#~ msgid "Name"
-#~ msgstr "Nombre"
+#~ msgid "Online with Movim"
+#~ msgstr "En línea con Movim"

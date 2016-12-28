@@ -1,18 +1,12 @@
 var Publish = {
-    init: function() {
-        if(localStorage.getItem('share_url')) {
-            Publish_ajaxCreateBlog();
-            MovimTpl.showPanel();
-        }
+    setEmbed: function() {
+        var embed = document.querySelector('input[name=embed]');
+        embed.onpaste();
     },
 
-    setEmbed: function() {
-        if(localStorage.getItem('share_url')) {
-            var embed = document.querySelector('input[name=embed]');
-            embed.value = localStorage.getItem('share_url');
-            embed.onpaste();
-            localStorage.removeItem('share_url');
-        }
+    clearEmbed: function() {
+        var embed = document.querySelector('input[name=embed]').value = '';
+        MovimTpl.fill('#preview', '');
     },
 
     enableSend: function() {
@@ -20,6 +14,7 @@ var Publish = {
     },
 
     disableSend: function() {
+        localStorage.removeItem('share_url');
         MovimUtils.addClass('#button_send', 'disabled');
     },
 
@@ -35,13 +30,7 @@ var Publish = {
             return;
         }
 
-        // We are on the news page
-        if(typeof Post_ajaxClear === 'function') {
-            Post_ajaxClear();
-            MovimTpl.hidePanel();
-        } else {
-            MovimUtils.reload(BASE_URI + '?group/' + server + '/' + node);
-        }
+        history.back();
     },
 
     checkFilled: function() {
@@ -51,6 +40,7 @@ var Publish = {
         while(i < form.elements.length)
         {
             if(form.elements[i].type != 'hidden'
+            && form.elements[i].type != 'checkbox'
             && form.elements[i].value != form.elements[i].defaultValue) {
                 return true;
             }
@@ -67,12 +57,22 @@ var Publish = {
     }
 }
 
+MovimWebsocket.attach(function() {
+    var parts = MovimUtils.urlParts();
+    if(parts.params.length > 3 && parts.params[3] == 'share') {
+        Publish_ajaxReply(parts.params[0], parts.params[1], parts.params[2]);
+    } else if(parts.params.length > 2) {
+        Publish_ajaxCreate(parts.params[0], parts.params[1], parts.params[2]);
+    } else if(parts.params.length > 0) {
+        Publish_ajaxCreate(parts.params[0], parts.params[1]);
+    } else {
+        Publish_ajaxCreate();
+    }
+});
+
 Upload.attach(function() {
     var embed = document.querySelector('input[name=embed]');
     embed.value = Upload.get;
     embed.onpaste();
 });
 
-MovimWebsocket.attach(function() {
-    Publish.init();
-});

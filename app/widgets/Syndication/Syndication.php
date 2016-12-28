@@ -4,15 +4,14 @@ class Syndication extends \Movim\Widget\Base
 {
     function load()
     {
-
     }
 
     function display()
     {
         ob_clean();
 
-        $pd = new \modl\PostnDAO();
-        $cd = new \modl\ContactDAO();
+        $pd = new \Modl\PostnDAO;
+        $cd = new \Modl\ContactDAO;
         $id = new \Modl\ItemDAO;
 
         if(!$this->get('s')) {
@@ -50,11 +49,11 @@ class Syndication extends \Movim\Widget\Base
 
             $feed->appendChild($author = $dom->createElement('author'));
             $author->appendChild($dom->createElement('name', $contact->getTrueName()));
-            $author->appendChild($dom->createElement('uri', Route::urlize('blog', [$from])));
+            $author->appendChild($dom->createElement('uri', $this->route('blog', [$from])));
 
             $feed->appendChild($dom->createElement('logo', $contact->getPhoto('l')));
 
-            $self->setAttribute('href', Route::urlize('feed', [$from]));
+            $self->setAttribute('href', $this->route('feed', [$from]));
         }
 
         if($item != null) {
@@ -70,7 +69,7 @@ class Syndication extends \Movim\Widget\Base
                 $feed->appendChild($dom->createElement('subtitle', $item->server));
             }
 
-            $self->setAttribute('href', Route::urlize('feed', [$from, $node]));
+            $self->setAttribute('href', $this->route('feed', [$from, $node]));
         }
 
         $feed->appendChild($generator = $dom->createElement('generator', 'Movim'));
@@ -94,7 +93,7 @@ class Syndication extends \Movim\Widget\Base
             $content->setAttribute('type', 'xhtml');
 
             $f = $dom->createDocumentFragment();
-            $f->appendXML($message->contentcleaned);
+            $f->appendXML(html_entity_decode($message->contentcleaned));
             $div->appendChild($f);
 
             $attachments = $message->getAttachments();

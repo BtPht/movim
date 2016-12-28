@@ -41,7 +41,6 @@ body > * {
     position: relative;
     overflow: hidden;
     font-family: 'Open Sans', sans-serif;
-    color: rgba(0, 0, 0, 0.87);
 }
 
 body > script {
@@ -60,8 +59,9 @@ body > nav {
     max-width: 95%;
     transition: width 0.3s cubic-bezier(.4,0,.2,1);
     z-index: 2;
-    position: relative;
+    position: absolute;
     overflow-y: auto;
+    left: 0;
 }
 
 body > nav:before {
@@ -144,6 +144,7 @@ main {
     background-color: white;
     transition: opacity 0.3s ease-in-out;
     transform: translateZ(0);
+    overflow-y: auto;
 }
 
 nav + main {
@@ -154,6 +155,7 @@ nav + main {
 main > section {
     height: 100%;
     position: relative;
+    overflow-y: auto;
 }
 
 main > section > div {
@@ -192,12 +194,36 @@ main > section > div:first-child:nth-last-child(2) ~ div {
     width: 70%;
     position: absolute;
     right: 0;
-    /*transition: left .3s cubic-bezier(.4,0,.2,1);*/
 }
 
+@media screen and (min-width: 1025px) {
+    main > section > aside {
+        width: calc(50% - 28rem);
+        float: right;
+        max-height: 100%;
+    }
+
+    main > section > aside > * {
+        max-width: 45rem;
+        margin-left: 1rem;
+    }
+
+    main > section > aside + div {
+        overflow-y: hidden;
+        width: calc(50% + 28rem);
+        float: left;
+        height: auto;
+    }
+
+    main > section > aside + div > * {
+        max-width: 100rem;
+        margin-right: 1rem;
+    }
+}
+/*
 main > section > div:first-child:nth-last-child(2) ~ div {
     background-color: white;
-}
+}*/
 
 main > section > div > div.contained { /* Specific behaviour when the scroll need to be inside the block */
     height: calc(100% - 7.5rem);
@@ -243,6 +269,14 @@ main > section > div > div.contained > * {
 
     body > nav {
         width: 0;
+    }
+
+    aside {
+        display: none;
+    }
+
+    main > section:not(.enabled) > aside + div:not(:first-child) {
+        display: block;
     }
 }
 
@@ -330,6 +364,11 @@ main section > div:first-child:nth-last-child(2) ~ div .actions.fixed > div:last
     background-image: url(../img/movim_cloud.svg);
     background-repeat: no-repeat;
     background-position: center center;
+    min-height: 30rem;
+}
+
+.spin {
+    min-height: 100%;
 }
 
 /* Placeholder */
@@ -373,6 +412,9 @@ main section > div:first-child:nth-last-child(2) ~ div .actions.fixed > div:last
 .icon.bookmark  { background-image: url(../img/icons/bookmark.svg); }
 .icon.clipboard { background-image: url(../img/icons/person.svg); }
 .icon.search    { background-image: url(../img/icons/search.svg); }
+.icon.blog      { background-image: url(../img/icons/description.svg); }
+.icon.gallery   { background-image: url(../img/icons/collections.svg); }
+.icon.share     { background-image: url(../img/icons/share.svg); }
 
 /* Padded */
 
@@ -411,6 +453,13 @@ main section > div:first-child:nth-last-child(2) ~ div .actions.fixed > div:last
 
 }
 
+/* Tag */
+.tag {
+    font-size: 1.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
+}
+
 /* Disabled */
 
 .faded {
@@ -432,6 +481,7 @@ div#spinner{
     text-align: center;
     margin: 50% 0;
 }
+
 .show{
     display: block;
 }

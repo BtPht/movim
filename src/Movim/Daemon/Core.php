@@ -4,24 +4,28 @@ namespace Movim\Daemon;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Movim\Daemon\Session;
+use Dflydev\FigCookies\Cookies;
 
-class Core implements MessageComponentInterface {
+use Symfony\Component\Console\Input\InputInterface;
+
+class Core implements MessageComponentInterface
+{
     private $sessions = [];
+    private $input;
+
     public $loop;
     public $baseuri;
 
-    public function __construct($loop, $baseuri, $port)
+    public function __construct($loop, $baseuri, InputInterface $input)
     {
-        $baseuri = rtrim($baseuri, '/') . '/';
+        $this->input = $input;
 
-        echo colorize("Movim daemon launched\n", 'green');
-        echo colorize("Base URI :", 'green')." {$baseuri}\n";
-        $this->setWebsocket($baseuri, $port);
+        $this->setWebsocket($baseuri, $this->input->getOption('port'));
 
         $this->loop    = $loop;
         $this->baseuri = $baseuri;
 
-        $sd = new \Modl\SessionxDAO();
+        $sd = new \Modl\SessionxDAO;
         $sd->clear();
 
         $this->registerCleaner();
@@ -79,7 +83,15 @@ class Core implements MessageComponentInterface {
         $sid = $this->getSid($conn);
         if($sid != null) {
             if(!array_key_exists($sid, $this->sessions)) {
-                $this->sessions[$sid] = new Session($this->loop, $sid, $this->baseuri);
+                $language = $this->getLanguage($conn);
+                $this->sessions[$sid] = new Session(
+                    $this->loop,
+                    $sid,
+                    $this->baseuri,
+                    $language,
+                    $this->input->getOption('verbose'),
+                    $this->input->getOption('debug')
+                );
             }
 
             $this->sessions[$sid]->attach($this->loop, $conn);
@@ -134,10 +146,10 @@ class Core implements MessageComponentInterface {
 
     private function cleanupDBSessions()
     {
-        $sd = new \Modl\SessionxDAO();
+        $sd = new \Modl\SessionxDAO;
         $sd->deleteEmpty();
 
-        $pd = new \Modl\PresenceDAO();
+        $pd = new \Modl\PresenceDAO;
         $pd->cleanPresences();
     }
 
@@ -160,11 +172,18 @@ class Core implements MessageComponentInterface {
         }
     }
 
+    private function getLanguage(ConnectionInterface $conn)
+    {
+        $languages = $conn->httpRequest->getHeader('Accept-Language');
+        return (is_array($languages)) ? $languages[0] : false;
+    }
+
     private function getSid(ConnectionInterface $conn)
     {
-        $cookies = $conn->WebSocket->request->getCookies();
-        if(array_key_exists('MOVIM_SESSION_ID', $cookies)) {
-            return $cookies['MOVIM_SESSION_ID'];
+        $cookies = Cookies::fromRequest($conn->httpRequest);
+
+        if($cookies->get('MOVIM_SESSION_ID')) {
+            return $cookies->get('MOVIM_SESSION_ID')->getValue();
         } else {
             return null;
         }

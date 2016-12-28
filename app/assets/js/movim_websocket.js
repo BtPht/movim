@@ -12,10 +12,6 @@ WebSocket.prototype.register = function(host) {
     this.send(JSON.stringify({'func' : 'register', 'host' : host}));
 };
 
-/*WebSocket.prototype.admin = function(key) {
-    this.send(JSON.stringify({'func' : 'admin', 'key' : key}));
-};*/
-
 /**
  * @brief Definition of the MovimWebsocket object
  * @param string error
@@ -56,13 +52,15 @@ var MovimWebsocket = {
             this.connection.close();
         }
 
-        this.connection = new WebSocket(uri);
+        this.connection = new WebSocket(uri + '?path=' + MovimUtils.urlParts().page);
 
         this.connection.onopen = function(e) {
             console.log("Connection established!");
             MovimWebsocket.attempts = 1;
             MovimWebsocket.launchAttached();
-            MovimWebsocket.ping();
+            setTimeout(function(){
+                MovimWebsocket.ping();
+            }, 15000);
         };
 
         this.connection.onmessage = function(e) {
@@ -81,6 +79,11 @@ var MovimWebsocket = {
 
                 if(obj.func == 'pong') {
                     MovimWebsocket.pong = true;
+                }
+
+                if(obj.func == 'block') {
+                    MovimWebsocket.clearAttached();
+                    MovimUtils.addClass('body', 'disabled');
                 }
 
                 MovimWebsocket.handle(obj);
@@ -212,15 +215,6 @@ var MovimWebsocket = {
     }
 }
 
-/*
-document.addEventListener("visibilitychange", function () {
-    if(!document.hidden) {
-        if(MovimWebsocket.connection.readyState == 3) {
-            MovimWebsocket.init();
-        }
-    }
-});
-*/
 window.onbeforeunload = function() {
     MovimWebsocket.connection.onclose = function () {}; // disable onclose handler first
     MovimWebsocket.connection.close()

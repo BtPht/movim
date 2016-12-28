@@ -2,8 +2,10 @@
 
 namespace modl;
 
-class CacheDAO extends SQL {
-    function get($key) {
+class CacheDAO extends SQL
+{
+    function get($key)
+    {
         $this->_sql = '
             select * from cache
             where
@@ -12,16 +14,17 @@ class CacheDAO extends SQL {
 
         $this->prepare(
             'Cache',
-            array(
+            [
                 'session' => $this->_user,
                 'name' => $key
-            )
+            ]
         );
 
         return $this->run('Cache', 'item');
     }
 
-    function set(Cache $cache) {
+    function set(Cache $cache)
+    {
         $this->_sql = '
             update cache
                 set data = :data,
@@ -31,12 +34,12 @@ class CacheDAO extends SQL {
 
         $this->prepare(
             'Cache',
-            array(
+            [
                 'session'   => $this->_user,
                 'data'      => $cache->data,
                 'timestamp' => $cache->timestamp,
                 'name'      => $cache->name
-            )
+            ]
         );
 
         $this->run('Cache');
@@ -49,12 +52,12 @@ class CacheDAO extends SQL {
 
             $this->prepare(
                 'Cache',
-                array(
+                [
                     'session'   => $this->_user,
                     'name'      => $cache->name,
                     'data'      => $cache->data,
                     'timestamp' => $cache->timestamp
-                )
+                ]
             );
 
             return $this->run('Cache');

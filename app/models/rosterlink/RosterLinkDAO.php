@@ -1,9 +1,11 @@
 <?php
 
-namespace modl;
+namespace Modl;
 
-class RosterLinkDAO extends SQL {
-    function set(RosterLink $r) {
+class RosterLinkDAO extends SQL
+{
+    function set(RosterLink $r)
+    {
         $this->_sql = '
             insert into rosterlink
             (
@@ -24,20 +26,21 @@ class RosterLinkDAO extends SQL {
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session'       => $this->_user,
                 'jid'           => $r->jid,
                 'rostername'    => $r->rostername,
                 'rosterask'     => $r->rosterask,
                 'rostersubscription'     => $r->rostersubscription,
                 'groupname'     => $r->groupname
-            )
+            ]
         );
 
         return $this->run('RosterLink');
     }
 
-    function setList($arr) {
+    function setList($arr)
+    {
         $this->_sql = '
             insert into rosterlink
             (
@@ -66,14 +69,14 @@ class RosterLinkDAO extends SQL {
 
             $params = array_merge(
                 $params,
-                array(
+                [
                     "session_$i"       => $this->_user,
                     "jid_$i"           => $r->jid,
                     "rostername_$i"    => $r->rostername,
                     "rosterask_$i"     => $r->rosterask,
                     "rostersubscription_$i"     => $r->rostersubscription,
                     "groupname_$i"     => $r->groupname
-                )
+                ]
             );
 
             $i++;
@@ -89,7 +92,8 @@ class RosterLinkDAO extends SQL {
         return $this->run('RosterLink');
     }
 
-    function update(RosterLink $r) {
+    function update(RosterLink $r)
+    {
         $this->_sql = '
             update rosterlink
             set rostername  = :rostername,
@@ -101,45 +105,48 @@ class RosterLinkDAO extends SQL {
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session'       => $this->_user,
                 'jid'           => $r->jid,
                 'rostername'    => $r->rostername,
                 'rosterask'     => $r->rosterask,
                 'rostersubscription'     => $r->rostersubscription,
                 'groupname'     => $r->groupname
-            )
+            ]
         );
 
         return $this->run('RosterLink');
     }
 
-    function setNow(RosterLink $r) {
+    function setNow(RosterLink $r)
+    {
         $this->update($r);
 
         if(!$this->_effective)
             $this->set($r);
     }
 
-    function get($jid) {
+    function get($jid)
+    {
         $this->_sql = '
             select *
             from rosterlink
-            where session=:session
+            where session = :session
                 and jid = :jid';
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session' => $this->_user,
                 'jid' => $jid,
-            )
+            ]
         );
 
         return $this->run('RosterLink', 'item');
     }
 
-    function getGroups() {
+    function getGroups()
+    {
         $this->_sql = '
             select groupname
             from rosterlink
@@ -148,9 +155,9 @@ class RosterLinkDAO extends SQL {
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session' => $this->_user
-            )
+            ]
         );
 
         $results = $this->run('RosterLink');
@@ -167,7 +174,8 @@ class RosterLinkDAO extends SQL {
         }
     }
 
-    function getRoster($to = null) {
+    function getRoster($to = null)
+    {
         if($to != null)
             $session = $to;
         else
@@ -176,33 +184,35 @@ class RosterLinkDAO extends SQL {
         $this->_sql = '
             select *
             from rosterlink
-            where session=:session';
+            where session = :session';
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session' => $session
-            )
+            ]
         );
 
         return $this->run('RosterLink');
     }
 
-    function clearRosterLink() {
+    function clearRosterLink()
+    {
         $this->_sql = '
             delete from rosterlink
             where session = :session';
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session' => $this->_user
-            )
+            ]
         );
 
         return $this->run('RosterLink');
     }
 
-    function delete($jid) {
+    function delete($jid)
+    {
         $this->_sql = '
             delete from rosterlink
             where session = :session
@@ -210,10 +220,10 @@ class RosterLinkDAO extends SQL {
 
         $this->prepare(
             'RosterLink',
-            array(
+            [
                 'session' => $this->_user,
                 'jid' => $jid
-            )
+            ]
         );
 
         return $this->run('RosterLink');

@@ -15,27 +15,23 @@
         "rain/raintpl": "dev-master",
         "michelf/php-markdown": "1.4.*@dev",
 
-        "movim/modl": "dev-master",
+        "movim/modl": "dev-master#5e7f0a68f0081ca5d4aefcbdfea1e63b4db7fd51",
         "movim/sasl2": "dev-master",
-        "movim/moxl": "dev-master#8c54affb3a38d7e0478fd48bfa786fd18d729dfe",
+        "movim/moxl": "dev-master#c28a264076c945888aacc7516fe26fa80eecfec5",
 
         "embed/embed": "dev-master",
-        "heyupdate/emoji": "0.2.*@dev",
+        "heyupdate/emoji": "dev-master",
 
-        "cboden/ratchet": "0.3.*",
+        "cboden/ratchet": "0.4.x-dev",
         "react/child-process": "dev-master",
-        "react/socket-client": "dev-master",
-        "react/stream": "0.4.*",
         "react/http": "dev-master#cd15204bd15d106d7832c680e4fb0ca0ce2f5e30",
-        "react/promise-timer": "^1.1",
 
-        "stojg/crop": "dev-master",
-        "forxer/Gravatar": "~1.2",
         "respect/validation": "1.0.*",
         "ezyang/htmlpurifier": "^4.7",
         "ramsey/uuid": "^3.2",
         "symfony/console": "^3.0",
         "cocur/slugify": "^2.1",
-        "guzzlehttp/guzzle": "^6.2"
+        "clue/buzz-react": "^1.0",
+        "dflydev/fig-cookies": "^1.0"
     }
 }

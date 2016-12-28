@@ -6,7 +6,6 @@ define('DOCUMENT_ROOT', dirname(__FILE__));
 gc_enable();
 
 use Movim\Bootstrap;
-//memprof_enable();
 
 $bootstrap = new Bootstrap;
 $booted = $bootstrap->boot();
@@ -16,13 +15,12 @@ $loop = React\EventLoop\Factory::create();
 $connector = new React\SocketClient\TcpConnector($loop);
 $stdin = new React\Stream\Stream(STDIN, $loop);
 
-fwrite(STDERR, colorize(getenv('sid'), 'yellow')." widgets before : ".\sizeToCleanSize(memory_get_usage())."\n");
+\Movim\Task\Engine::init($loop);
 
 // We load and register all the widgets
 $wrapper = \Movim\Widget\Wrapper::getInstance();
 $wrapper->registerAll($bootstrap->getWidgets());
 
-fwrite(STDERR, colorize(getenv('sid'), 'yellow')." widgets : ".\sizeToCleanSize(memory_get_usage())."\n");
 
 $conn = null;
 
@@ -33,7 +31,14 @@ $buffer = '';
 $timestamp = time();
 
 function handleSSLErrors($errno, $errstr) {
-    fwrite(STDERR, colorize(getenv('sid'), 'yellow')." : ".colorize($errstr, 'red')."\n");
+    fwrite(
+        STDERR,
+        colorize(getenv('sid'), 'yellow').
+        " : ".colorize($errno, 'red').
+        " ".
+        colorize($errstr, 'red').
+        "\n"
+    );
 }
 
 // Temporary linker killer
@@ -55,7 +60,39 @@ $loop->addPeriodicTimer(5, function() use(&$conn, &$timestamp) {
     }
 });*/
 
-$stdin_behaviour = function ($data) use (&$conn, $loop, &$buffer, &$connector, &$xmpp_behaviour, &$parser, &$timestamp) {
+function writeOut()
+{
+    $msg = \RPC::commit();
+
+    if(!empty($msg)) {
+        echo base64_encode(gzcompress(json_encode($msg), 9))."";
+        //fwrite(STDERR, colorize(json_encode($msg).' '.strlen($msg), 'yellow')." : ".colorize('sent to browser', 'green')."\n");
+    }
+
+    \RPC::clear();
+}
+
+function writeXMPP($xml)
+{
+    global $conn;
+
+    if(!empty($xml) && $conn) {
+        $conn->write(trim($xml));
+
+        if(getenv('debug')) {
+            fwrite(STDERR, colorize(trim($xml), 'yellow')." : ".colorize('sent to XMPP', 'green')."\n");
+        }
+    }
+}
+
+function tick()
+{
+    global $loop;
+    $loop->tick();
+}
+
+$stdin_behaviour = function ($data) use (&$conn, $loop, &$buffer, &$connector, &$xmpp_behaviour, &$parser, &$timestamp)
+{
     if(substr($data, -1) == "") {
         $messages = explode("", $buffer . substr($data, 0, -1));
         $buffer = '';
@@ -79,13 +116,19 @@ $stdin_behaviour = function ($data) use (&$conn, $loop, &$buffer, &$connector, &
                         break;
 
                     case 'down':
-                        $evt = new Event;
-                        $evt->runEvent('session_down');
+                        if(isset($conn)
+                        && is_resource($conn->stream)) {
+                            $evt = new Movim\Widget\Event;
+                            $evt->run('session_down');
+                        }
                         break;
 
                     case 'up':
-                        $evt = new Event;
-                        $evt->runEvent('session_up');
+                        if(isset($conn)
+                        && is_resource($conn->stream)) {
+                            $evt = new Movim\Widget\Event;
+                            $evt->run('session_up');
+                        }
                         break;
 
                     case 'unregister':
@@ -112,36 +155,25 @@ $stdin_behaviour = function ($data) use (&$conn, $loop, &$buffer, &$connector, &
                         $ip = \Moxl\Utils::resolveIp($msg->host);
                         $ip = (!$ip || !isset($ip->address)) ? gethostbyname($msg->host) : $ip->address;
 
-                        fwrite(
-                            STDERR,
-                            colorize(
-                                getenv('sid'), 'yellow')." : ".
-                                colorize('Connection to '.$msg->host.' ('.$ip.')', 'blue').
-                                "\n");
+                        if(getenv('verbose')) {
+                            fwrite(
+                                STDERR,
+                                colorize(
+                                    getenv('sid'), 'yellow')." : ".
+                                    colorize('Connection to '.$msg->host.' ('.$ip.')', 'blue').
+                                    "\n");
+                        }
+
                         $connector->create($ip, $port)->then($xmpp_behaviour);
                         break;
                 }
+
+                $rpc = new \RPC();
+                $rpc->handle_json($msg);
+
+                writeOut();
             } else {
                 return;
-            }
-
-            $rpc = new \RPC();
-            $rpc->handle_json($msg);
-
-            $msg = \RPC::commit();
-            \RPC::clear();
-
-            if(!empty($msg)) {
-                echo base64_encode(gzcompress(json_encode($msg), 9))."";
-                //fwrite(STDERR, colorize(json_encode($msg), 'yellow')." : ".colorize('sent to the browser', 'green')."\n");
-            }
-
-            $xml = \Moxl\API::commit();
-            \Moxl\API::clear();
-
-            if(!empty($xml) && $conn) {
-                $conn->write(trim($xml));
-                #fwrite(STDERR, colorize(trim($xml), 'yellow')." : ".colorize('sent to XMPP', 'green')."\n");
             }
         }
     } else {
@@ -149,21 +181,28 @@ $stdin_behaviour = function ($data) use (&$conn, $loop, &$buffer, &$connector, &
     }
 };
 
-$xmpp_behaviour = function (React\Stream\Stream $stream) use (&$conn, $loop, &$stdin, $stdin_behaviour, $parser, &$timestamp) {
+$xmpp_behaviour = function (React\Stream\Stream $stream) use (&$conn, $loop, &$stdin, $stdin_behaviour, $parser, &$timestamp)
+{
     $conn = $stream;
-    fwrite(STDERR, colorize(getenv('sid'), 'yellow')." : ".colorize('linker launched', 'blue')."\n");
-    fwrite(STDERR, colorize(getenv('sid'), 'yellow')." launched : ".\sizeToCleanSize(memory_get_usage())."\n");
+
+    if(getenv('verbose')) {
+        fwrite(STDERR, colorize(getenv('sid'), 'yellow')." : ".colorize('linker launched', 'blue')."\n");
+        fwrite(STDERR, colorize(getenv('sid'), 'yellow')." launched : ".\sizeToCleanSize(memory_get_usage())."\n");
+    }
 
     $stdin->removeAllListeners('data');
     $stdin->on('data', $stdin_behaviour);
 
     // We define a huge buffer to prevent issues with SSL streams, see https://bugs.php.net/bug.php?id=65137
     $conn->bufferSize = 1024*32;
+    //$conn->bufferSize = 1024;
     $conn->on('data', function($message) use (&$conn, $loop, $parser, &$timestamp) {
         if(!empty($message)) {
             $restart = false;
 
-            #fwrite(STDERR, colorize($message, 'yellow')." : ".colorize('received', 'green')."\n");
+            if(getenv('debug')) {
+                fwrite(STDERR, colorize($message, 'yellow')." : ".colorize('received', 'green')."\n");
+            }
 
             if($message == '</stream:stream>') {
                 $conn->close();
@@ -175,8 +214,6 @@ $xmpp_behaviour = function (React\Stream\Stream $stream) use (&$conn, $loop, &$s
                 stream_context_set_option($conn->stream, 'ssl', 'SNI_enabled', false);
                 stream_context_set_option($conn->stream, 'ssl', 'peer_name', $session->get('host'));
                 stream_context_set_option($conn->stream, 'ssl', 'allow_self_signed', true);
-                #stream_context_set_option($conn->stream, 'ssl', 'verify_peer_name', false);
-                #stream_context_set_option($conn->stream, 'ssl', 'verify_peer', false);
 
                 // See http://php.net/manual/en/function.stream-socket-enable-crypto.php#119122
                 $crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
@@ -189,26 +226,22 @@ $xmpp_behaviour = function (React\Stream\Stream $stream) use (&$conn, $loop, &$s
                 set_error_handler('handleSSLErrors');
                 $out = stream_socket_enable_crypto($conn->stream, 1, $crypto_method);
                 restore_error_handler();
+
                 if($out !== true) {
                     $loop->stop();
                     return;
                 }
 
-                fwrite(STDERR, colorize(getenv('sid'), 'yellow')." : ".colorize('TLS enabled', 'blue')."\n");
+                if(getenv('verbose')) {
+                    fwrite(STDERR, colorize(getenv('sid'), 'yellow')." : ".colorize('TLS enabled', 'blue')."\n");
+                }
 
                 $restart = true;
             }
 
             #fwrite(STDERR, colorize(getenv('sid'), 'yellow')." widgets : ".\sizeToCleanSize(memory_get_usage())."\n");
 
-            \Moxl\API::clear();
-            \RPC::clear();
-
             $timestamp = time();
-
-            if(!$parser->parse($message)) {
-                fwrite(STDERR, colorize(getenv('sid'), 'yellow')." ".$parser->getError()."\n");
-            }
 
             if($restart) {
                 $session = \Session::start();
@@ -217,27 +250,22 @@ $xmpp_behaviour = function (React\Stream\Stream $stream) use (&$conn, $loop, &$s
                 $restart = false;
             }
 
-            $msg = \RPC::commit();
-
-            if(!empty($msg)) {
-                echo base64_encode(gzcompress(json_encode($msg), 9))."";
-                //fwrite(STDERR, colorize(json_encode($msg).' '.strlen($msg), 'yellow')." : ".colorize('sent to browser', 'green')."\n");
+            if(!$parser->parse($message)) {
+                fwrite(STDERR, colorize(getenv('sid'), 'yellow')." ".$parser->getError()."\n");
             }
 
-            \RPC::clear();
+            while($parser->nodes && !$parser->nodes->isEmpty()) {
+                $node = $parser->nodes->dequeue();
+                \Moxl\Xec\Handler::handle($node);
 
-            $xml = \Moxl\API::commit();
+                $loop->tick();
 
-            if(!empty($xml)) {
-                $conn->write(trim($xml));
-                #fwrite(STDERR, colorize(trim($xml), 'yellow')." : ".colorize('sent to XMPP', 'green')."\n");
+                unset($node);
             }
 
-            \Moxl\API::clear();
+            writeOut();
 
-            gc_collect_cycles();
             //fwrite(STDERR, colorize(getenv('sid'), 'yellow')." end data : ".\sizeToCleanSize(memory_get_usage())."\n");
-            //memprof_dump_callgrind(fopen("/tmp/callgrind.out", "w"));
         }
 
         $loop->tick();

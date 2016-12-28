@@ -1,16 +1,24 @@
 <?php
+
 use Movim\Controller\Base;
 
 class NewsController extends Base
 {
-    function load() {
+    function load()
+    {
         $this->session_only = true;
     }
 
-    function dispatch() {
+    function dispatch()
+    {
         $this->page->setTitle(__('page.news'));
 
-        $user = new User();
+        $user = new User;
+
+        if(!$user->isSupported('pubsub')) {
+            $this->redirect('contact');
+        }
+
         if(!$user->isLogged()) {
             $pd = new \Modl\PostnDAO;
             $p  = $pd->get(

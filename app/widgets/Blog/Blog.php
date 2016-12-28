@@ -4,8 +4,9 @@ use Respect\Validation\Validator;
 
 include_once WIDGETS_PATH.'Post/Post.php';
 
-class Blog extends \Movim\Widget\Base {
-    public $_paging = 10;
+class Blog extends \Movim\Widget\Base
+{
+    public $_paging = 8;
 
     private $_from;
     private $_node;
@@ -29,7 +30,7 @@ class Blog extends \Movim\Widget\Base {
             $this->_item = $pd->getItem($this->_from, $this->_node);
             $this->_mode = 'group';
 
-            $this->url = Route::urlize('node', array($this->_from, $this->_node));
+            $this->url = $this->route('node', [$this->_from, $this->_node]);
         } elseif($this->_view == 'tag' && $this->validateTag($this->get('t'))) {
             $this->_mode = 'tag';
             $this->_tag = $this->get('t');
@@ -37,19 +38,21 @@ class Blog extends \Movim\Widget\Base {
         } else {
             $this->_from = $this->get('f');
 
-            $cd = new \modl\ContactDAO();
+            $cd = new \Modl\ContactDAO;
             $this->_contact = $cd->get($this->_from, true);
+
             if(filter_var($this->_from, FILTER_VALIDATE_EMAIL)) {
                 $this->_node = 'urn:xmpp:microblog:0';
             } else {
                 return;
             }
+
             $this->_mode = 'blog';
 
-            $this->url = Route::urlize('blog', $this->_from);
+            $this->url = $this->route('blog', $this->_from);
         }
 
-        $pd = new \modl\PostnDAO();
+        $pd = new \Modl\PostnDAO;
 
         if($this->_id = $this->get('i')) {
             if(Validator::stringType()->between('1', '100')->validate($this->_id)) {
@@ -77,9 +80,9 @@ class Blog extends \Movim\Widget\Base {
                 }
 
                 if($this->_view == 'node') {
-                    $this->url = Route::urlize('node', array($this->_from, $this->_node, $this->_id));
+                    $this->url = $this->route('node', [$this->_from, $this->_node, $this->_id]);
                 } else {
-                    $this->url = Route::urlize('blog', array($this->_from, $this->_id));
+                    $this->url = $this->route('blog', [$this->_from, $this->_id]);
                 }
             }
         } else {
@@ -93,6 +96,8 @@ class Blog extends \Movim\Widget\Base {
 
         if(count($this->_messages) == $this->_paging + 1) {
             array_pop($this->_messages);
+        } else {
+            $this->_page = null;
         }
 
         if($this->_node == 'urn:xmpp:microblog:0') {
@@ -107,7 +112,8 @@ class Blog extends \Movim\Widget\Base {
         }
     }
 
-    public function preparePost($p) {
+    public function preparePost($p)
+    {
         $pw = new Post;
         return $pw->preparePost($p, true, true);
     }

@@ -1,8 +1,9 @@
 <?php
 
-namespace modl;
+namespace Modl;
 
-class Sessionx extends Model {
+class Sessionx extends Model
+{
     public $session;
     public $username;
     public $hash;
@@ -13,31 +14,16 @@ class Sessionx extends Model {
     public $start;
     public $timestamp;
 
-    public function __construct() {
-        $this->_struct = '
-        {
-            "session" :
-                {"type":"string", "size":32, "key":true },
-            "jid" :
-                {"type":"string", "size":64 },
-            "username" :
-                {"type":"string", "size":64 },
-            "hash" :
-                {"type":"string", "size":64 },
-            "resource" :
-                {"type":"string", "size":16 },
-            "host" :
-                {"type":"string", "size":64,  "mandatory":true },
-            "config" :
-                {"type":"text" },
-            "active" :
-                {"type":"int",    "size":4 },
-            "start" :
-                {"type":"date" },
-            "timestamp" :
-                {"type":"date" }
-        }';
-
-        parent::__construct();
-    }
+    public $_struct = [
+        'session'   => ['type' => 'string','size' => 32,'key' => true],
+        'jid'       => ['type' => 'string','size' => 64],
+        'username'  => ['type' => 'string','size' => 64],
+        'hash'      => ['type' => 'string','size' => 64],
+        'resource'  => ['type' => 'string','size' => 16],
+        'host'      => ['type' => 'string','size' => 64,'mandatory' => true],
+        'config'    => ['type' => 'text'],
+        'active'    => ['type' => 'int','size' => 4],
+        'start'     => ['type' => 'date'],
+        'timestamp' => ['type' => 'date']
+    ];
 }

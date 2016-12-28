@@ -2,6 +2,8 @@
 
 use Moxl\Xec\Action\Pubsub\GetItems;
 
+include_once WIDGETS_PATH.'Post/Post.php';
+
 class Menu extends \Movim\Widget\Base
 {
     private $_paging = 15;
@@ -19,7 +21,8 @@ class Menu extends \Movim\Widget\Base
 
     function onHandle($packet)
     {
-        if(isset($packet->content['nodeid'])) {
+        if(is_array($packet->content)
+        && isset($packet->content['nodeid'])) {
             $this->onRetract($packet);
         } else {
             $this->onPost($packet);
@@ -44,11 +47,12 @@ class Menu extends \Movim\Widget\Base
     function onPost($packet)
     {
         $pd = new \Modl\PostnDAO;
-        $since = Cache::c('since');
+        $since = \Movim\Cache::c('since');
         $count = $pd->getCountSince($since);
         $post = $packet->content;
 
         if($count > 0
+        && is_object($post)
         && (strtotime($post->published) > strtotime($since))) {
             if($post->isMicroblog()) {
                 $cd = new \Modl\ContactDAO;
@@ -121,8 +125,8 @@ class Menu extends \Movim\Widget\Base
             RPC::call('MovimTpl.fill', '#menu_widget', $html);
             RPC::call('movim_posts_unread', 0);
         }
+
         RPC::call('Menu.refresh');
-        //RPC::call('MovimTpl.scrollTop');
     }
 
     function ajaxRefresh()
@@ -140,14 +144,15 @@ class Menu extends \Movim\Widget\Base
         }
     }
 
-    function prepareList($type = 'all', $server = null, $node = null, $page = 0) {
+    function prepareList($type = 'all', $server = null, $node = null, $page = 0)
+    {
         $view = $this->tpl();
         $pd = new \Modl\PostnDAO;
-        $count = $pd->getCountSince(Cache::c('since'));
+        $count = $pd->getCountSince(\Movim\Cache::c('since'));
         // getting newer, not older
         if($page == 0 || $page == ""){
             $count = 0;
-            Cache::c('since', date(DATE_ISO8601, strtotime($pd->getLastDate())));
+            \Movim\Cache::c('since', date(DATE_ISO8601, strtotime($pd->getLastDate())));
         }
 
         $next = $page + 1;
@@ -166,6 +171,7 @@ class Menu extends \Movim\Widget\Base
                 $items  = $pd->getFeed($page * $this->_paging + $count, $this->_paging);
                 break;
             case 'me' :
+                $view->assign('jid', $this->user->getLogin());
                 $view->assign('history', $this->call('ajaxGetMe', $next));
                 $items  = $pd->getMe($page * $this->_paging + $count, $this->_paging);
                 break;
@@ -189,6 +195,12 @@ class Menu extends \Movim\Widget\Base
         }
 
         return $html;
+    }
+
+    function preparePost($p)
+    {
+        $pw = new \Post;
+        return $pw->preparePost($p, true, true, true);
     }
 
     function display()

@@ -1,24 +1,8 @@
-<header>
+<header class="relative">
     <ul class="list middle">
         <li>
-            {if="$reply"}
-            <span class="primary icon active" onclick="Drawer_ajaxClear()">
-                <i class="zmdi zmdi-close"></i>
-            </span>
-            {else}
-            <span class="primary icon active" onclick="Publish.headerBack('{$to}', '{$node}', false);">
+            <span class="primary icon active" onclick="Publish.headerBack('{$to}', '{$node}', false);  Publish_ajaxClearShareUrl();">
                 <i class="zmdi zmdi-arrow-back"></i>
-            </span>
-            {/if}
-
-            <span id="button_send" class="control icon active" onclick="Publish.disableSend(); Publish_ajaxPublish(MovimUtils.formToJson('post'));">
-                <i class="zmdi zmdi-mail-send"></i>
-            </span>
-            <span class="control icon active" onclick="Publish_ajaxHelp()">
-                <i class="zmdi zmdi-help"></i>
-            </span>
-            <span class="control icon active" onclick="Publish_ajaxPreview(MovimUtils.formToJson('post'))">
-                <i class="zmdi zmdi-eye"></i>
             </span>
 
             <p class="line">
@@ -44,11 +28,20 @@
             </p>-->
         </li>
     </ul>
+
+    <span
+        title="{$c->__('menu.add_post')}"
+        id="button_send"
+        class="button action color"
+        onclick="Publish.disableSend(); Publish_ajaxPublish(MovimUtils.formToJson('post'));">
+        <i class="zmdi zmdi-mail-send"></i>
+    </span>
 </header>
 
 <form name="post" class="block padded">
     {if="$reply"}
     <ul class="list thick card">
+        <li></li>
         <li class="block">
             {if="$reply->picture"}
                 <span
@@ -56,7 +49,7 @@
                     style="background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%), url({$reply->picture});"></span>
             {/if}
             <p class="line">{$reply->title}</p>
-            <p>{$reply->contentcleaned|stripTags}</p>
+            <p>{$reply->getSummary()}</p>
             <p>
                 {if="$reply->isMicroblog()"}
                     <i class="zmdi zmdi-account"></i> {$reply->getContact()->getTrueName()}
@@ -87,25 +80,33 @@
             name="title"
             placeholder="{$c->__('post.title')}"
             {if="$item != false"}
-                value="{$item->title|htmlspecialchars}"
+                value="{$item->title}"
             {elseif="$reply"}
-                value="{$reply->title|htmlspecialchars}"
+                value="{$reply->title}"
             {/if}>
         <label for="title">{$c->__('post.title')}</label>
     </div>
 
     <div id="content_link" {if="$reply"}class="hide"{/if}>
         {if="$item != false"}
-            {$attachment = $item->getAttachment(true)}
+            {$attachment = $item->getAttachment()}
         {/if}
+        <a class="button oppose flat gray" style="margin-top: 4rem" onclick="Publish_ajaxClearShareUrl()">
+            <i class="zmdi zmdi-close"></i>
+        </a>
         <input
             type="url"
+            style="width: calc(100% - 6rem)"
             name="embed"
             placeholder="http://myawesomewebsite.com/ or http://mynicepictureurl.com/"
             onpaste="var e=this; setTimeout(function(){Publish_ajaxEmbedTest(e.value);}, 4);"
-            {if="isset($attachment) && $attachment != false"}value="{$attachment.href}"{/if}
+            {if="isset($attachment) && $attachment != false"}
+                value="{$attachment.href}"
+            {elseif="$url"}
+                value="{$url}"
+            {/if}
         >
-        <label for="embed">{$c->__('post.link')}</label>
+        <label for="embed">{$c->__('publish.link')}</label>
 
         <article>
             <section>
@@ -120,9 +121,18 @@
         <label>{$c->__('publish.add_text_label')}</label>
     </div>
     <div id="content_field" class="hide">
-        <textarea name="content" placeholder="{$c->__('post.content_text')}" oninput="MovimUtils.textareaAutoheight(this);">{if="$item != false"}{$item->contentraw}{/if}</textarea>
-        <label for="content">{$c->__('post.content_label')}</label>
+        <textarea name="content" placeholder="{$c->__('publish.content_text')}" oninput="MovimUtils.textareaAutoheight(this);">{if="$item != false"}{$item->contentraw}{/if}</textarea>
+        <label for="content">{$c->__('publish.content_label')}</label>
+
+        <a class="button oppose flat gray" onclick="Publish_ajaxHelp()">
+            <i class="zmdi zmdi-help"></i> {$c->__('publish.help')}
+        </a>
+        <a class="button oppose flat gray" onclick="Publish_ajaxPreview(MovimUtils.formToJson('post'))">
+            <i class="zmdi zmdi-eye"></i> {$c->__('publish.preview')}
+        </a>
     </div>
+
+    <hr class="clear" />
 
     <div>
         {if="$item != false"}
@@ -135,7 +145,7 @@
             {if="isset($tags)"}
                 value="{$tags}"
             {/if}>
-        <label for="title">{$c->__('post.tags')}</label>
+        <label for="title">{$c->__('publish.tags')}</label>
     </div>
 
     <ul class="list middle active {if="$reply"}hide{/if}">
@@ -152,7 +162,7 @@
     <div>
         <ul class="list middle">
             <li>
-                <span class="control">
+                <span class="primary">
                     <div class="action">
                         <div class="checkbox">
                             <input
@@ -174,3 +184,4 @@
         </ul>
     </div>
 </form>
+

@@ -32,6 +32,8 @@ class Login extends \Movim\Widget\Base
             //$c = new Chats;
             //$c->ajaxGetHistory();
 
+            $this->rpc('Login.rememberSession', $this->user->getLogin());
+
             // We get the configuration
             $s = new Get;
             $s->setXmlns('movim:prefs')
@@ -42,7 +44,7 @@ class Login extends \Movim\Widget\Base
     function onConfig($packet)
     {
         $this->user->createDir();
-        RPC::call('Login.post', $this->user->getLogin(), Route::urlize('root'));
+        RPC::call('Login.post', $this->user->getLogin(), $this->route('root'));
     }
 
     function display()
@@ -151,7 +153,7 @@ class Login extends \Movim\Widget\Base
         $config = $cd->get();
 
         // First we check the form
-        $validate_login   = Validator::email()->length(1, 254);
+        $validate_login   = Validator::stringType()->length(1, 254);
         $validate_password = Validator::stringType()->length(1, 128);
 
         if(!$validate_login->validate($login)) {
@@ -183,10 +185,8 @@ class Login extends \Movim\Widget\Base
         $here = $sd->getHash(sha1($username.$password.$host));
 
         if($here) {
-        //if($s->get('hash') == sha1($username.$password.$host)) {
             RPC::call('Login.setCookie', $here->session);
-            RPC::call('MovimUtils.redirect', Route::urlize('main'));
-            $this->showErrorBlock('conflict');
+            RPC::call('MovimUtils.redirect', $this->route('main'));
             return;
         }
 

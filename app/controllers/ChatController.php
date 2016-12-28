@@ -3,11 +3,13 @@ use Movim\Controller\Base;
 
 class ChatController extends Base
 {
-    function load() {
+    function load()
+    {
         $this->session_only = true;
     }
 
-    function dispatch() {
+    function dispatch()
+    {
         $this->page->setTitle(__('page.chats'));
     }
 }

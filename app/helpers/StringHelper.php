@@ -1,7 +1,7 @@
 <?php
 
 use HeyUpdate\Emoji\Emoji;
-use HeyUpdate\Emoji\EmojiIndex;
+use HeyUpdate\Emoji\Index\CompiledIndex;
 
 /**
  * @desc A singleton wrapper for the Emoji library
@@ -14,25 +14,25 @@ class MovimEmoji
 
     protected function __construct()
     {
-        $cd = new \Modl\ConfigDAO();
+        $cd = new \Modl\ConfigDAO;
         $config = $cd->get();
         $this->_theme = $config->theme;
 
-        $this->_emoji = new Emoji(new EmojiIndex(), $this->getPath());
+        $this->_emoji = new Emoji(new CompiledIndex, $this->getPath());
     }
 
     public function replace($string)
     {
-        $this->_emoji->setAssetUrlFormat($this->getPath());
+        $this->_emoji->setImageHtmlTemplate('<img alt="{{name}}" class="emoji" src="'.$this->getPath().'">');
         $string = $this->_emoji->replaceEmojiWithImages($string);
-        $this->_emoji->setAssetUrlFormat($this->getPath());
+        $this->_emoji->setImageHtmlTemplate('<img alt=":%s:" class="emoji" src="'.$this->getPath().'">');
 
         return $string;
     }
 
     private function getPath()
     {
-        return BASE_URI . 'themes/' . $this->_theme . '/img/emojis/svg/%s.svg';
+        return BASE_URI . 'themes/' . $this->_theme . '/img/emojis/svg/{{unicode}}.svg';
     }
 
     public static function getInstance()
@@ -140,7 +140,7 @@ function echapJid($jid)
  */
 function echapJS($string)
 {
-    return str_replace("\\", "\\\\", $string);
+    return str_replace(["\\", "'"], ["\\\\", "\\'"], $string);
 }
 
 /*
@@ -239,7 +239,7 @@ function stringToColor($string)
         7 => 'brown'
     ];
 
-    $s = crc32($string);
+    $s = abs(crc32($string));
     return $colors[$s%8];
 }
 
@@ -264,12 +264,23 @@ function purifyHTML($string)
 }
 
 /**
+ * Check if a string is RTL
+ * @param string
+ * @return string
+ */
+function isRTL($string)
+{
+    return preg_match('/\p{Arabic}|\p{Hebrew}/u', $string);
+}
+
+/**
  * Return the first two letters of a string
  * @param string
  * @return string
  */
-function firstLetterCapitalize($string) {
-    return ucfirst(strtolower(mb_substr($string, 0, 2)));
+function firstLetterCapitalize($string, $firstOnly = false) {
+    $size = ($firstOnly) ? 1 : 2;
+    return ucfirst(strtolower(mb_substr($string, 0, $size)));
 }
 
 /** Return a clean string that can be used for HTML ids
@@ -277,7 +288,7 @@ function firstLetterCapitalize($string) {
  * @return string
  */
 function cleanupId($string) {
-    return "id-" . preg_replace('/([^a-z0-9]+)/i', '-', $string);
+    return "id-" . strtolower(preg_replace('/([^a-z0-9]+)/i', '-', $string));
 }
 
 /**

@@ -21,28 +21,9 @@ Storage.prototype.getObject = function(key) {
     return JSON.parse(this.getItem(key));
 };
 
-
-
 var MovimUtils = {
-    accentsTidy: function(s){
-        //Ian Elliott in http://stackoverflow.com/questions/990904/javascript-remove-accents-diacritics-in-strings
-        var r = s.toLowerCase();
-        r = r.replace(new RegExp("\\s", 'g'),"");
-        r = r.replace(new RegExp("[àáâãäå]", 'g'),"a");
-        r = r.replace(new RegExp("æ", 'g'),"ae");
-        r = r.replace(new RegExp("ç", 'g'),"c");
-        r = r.replace(new RegExp("[èéêë]", 'g'),"e");
-        r = r.replace(new RegExp("[ìíîï]", 'g'),"i");
-        r = r.replace(new RegExp("ñ", 'g'),"n");
-        r = r.replace(new RegExp("[òóôõö]", 'g'),"o");
-        r = r.replace(new RegExp("œ", 'g'),"oe");
-        r = r.replace(new RegExp("[ùúûü]", 'g'),"u");
-        r = r.replace(new RegExp("[ýÿ]", 'g'),"y");
-        r = r.replace(new RegExp("\\W", 'g'),"");
-        return r;
-    },
     cleanupId: function(string) {
-        return "id-" + string.replace(/([^a-z0-9]+)/gi, '-');
+        return "id-" + string.replace(/([^a-z0-9]+)/gi, '-').toLowerCase();
     },
     base64Decode: function(data) {
         //  discuss at: http://phpjs.org/functions/base64_decode/
@@ -161,7 +142,7 @@ var MovimUtils = {
         if(typeof node == "string")
             node = MovimUtils.getNode(node);
         if(!node) return false;
-        return node.className.split(" ").indexOf(classname) == -1? false : true;
+        return node.classList.contains(classname);
     },
     showElement: function(element) {
         if(!MovimUtils.hasClass(element, "show"))
@@ -216,14 +197,13 @@ var MovimUtils = {
     addClass: function(element, classname) {
         if(!MovimUtils.hasClass(element, classname)) {
             element = MovimUtils.getNode(element);
-            element.className += " " + classname;
+            element.classList.add(classname);
         }
     },
-    removeClass: function(element,classname) {
+    removeClass: function(element, classname) {
         if (MovimUtils.hasClass(element, classname)) {
-            var reg = new RegExp('(\\s|^)' + classname + '(\\s|$)');
             element = MovimUtils.getNode(element);
-            element.className = element.className.replace(reg,' ');
+            element.classList.remove(classname);
         }
     },
     removeClassInList: function(myclass, list) {
@@ -273,28 +253,15 @@ var MovimUtils = {
             i++;
         }
     },
-    dataURLtoBlob : function(dataURI) {
-        // convert base64 to raw binary data held in a string
-        var byteString = atob(dataURI.split(',')[1]);
-
-        // separate out the mime component
-        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-        // write the bytes of the string to an ArrayBuffer
-        var arrayBuffer = new ArrayBuffer(byteString.length);
-        var _ia = new Uint8Array(arrayBuffer);
-        for (var i = 0; i < byteString.length; i++) {
-            _ia[i] = byteString.charCodeAt(i);
-        }
-
-        var dataView = new DataView(arrayBuffer);
-        var blob = new Blob([dataView.buffer], { type: mimeString });
-        return blob;
-    },
     urlParts : function() {
         var str = window.location.search.split('/');
         var page = str[0].substr(1);
-        str.shift()
+        str.shift();
+
+        var str = str.map(function(param) {
+            return decodeURIComponent(param);
+        });
+
         var parts = {'page': page, 'params': str};
         return parts;
     }

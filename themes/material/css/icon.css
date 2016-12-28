@@ -24,6 +24,10 @@ span.icon.top {
     left: 0;
 }
 
+span.icon.top.preview {
+    height: 25rem;
+}
+
 span.icon.primary.thumb {
     left: 0;
     width: 7rem;
@@ -32,7 +36,11 @@ span.icon.primary.thumb {
     margin: 0;
     line-height: 7.5rem;
 }
-
+/*
+*[dir="rtl"] span.icon.primary.thumb {
+    right: 0;
+}
+*/
 li.oppose span.icon {
     left: auto;
     right: 2rem;
@@ -59,6 +67,10 @@ ul.list li span.icon.small {
     height: 3rem;
     line-height: 3rem;
     margin-top: -1.5rem;
+}
+
+ul.list li span.icon.small:not(.bubble) i {
+    padding: 1rem 0;
 }
 
 /*ul.list li > .control.small,

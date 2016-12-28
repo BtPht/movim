@@ -3,8 +3,10 @@ namespace Movim\Daemon;
 
 use Ratchet\ConnectionInterface;
 use React\EventLoop\Timer\Timer;
+use Movim\Controller\Front;
 
-class Session {
+class Session
+{
     protected   $clients;
     public      $timestamp;
     protected   $sid;
@@ -17,10 +19,19 @@ class Session {
     protected   $buffer;
     private     $state;
 
-    public function __construct($loop, $sid, $baseuri)
+    private     $verbose;
+    private     $debug;
+
+    private     $language;
+
+    public function __construct($loop, $sid, $baseuri, $language = false, $verbose = false, $debug = false)
     {
         $this->sid     = $sid;
         $this->baseuri = $baseuri;
+        $this->language = $language;
+
+        $this->verbose = $verbose;
+        $this->debug = $debug;
 
         $this->clients = new \SplObjectStorage;
         $this->register($loop, $this);
@@ -32,16 +43,22 @@ class Session {
     {
         $this->clients->attach($conn);
 
+        if($this->verbose) {
+            echo colorize($this->sid, 'yellow'). " : ".colorize($conn->resourceId." connected\n", 'green');
+        }
+
         if($this->countClients() > 0) {
             $this->stateOut('up');
         }
-
-        echo colorize($this->sid, 'yellow'). " : ".colorize($conn->resourceId." connected\n", 'green');
     }
 
     public function detach($loop, ConnectionInterface $conn)
     {
         $this->clients->detach($conn);
+
+        if($this->verbose) {
+            echo colorize($this->sid, 'yellow'). " : ".colorize($conn->resourceId." deconnected\n", 'red');
+        }
 
         if($this->countClients() == 0) {
             $loop->addPeriodicTimer(10, function($timer) {
@@ -51,8 +68,6 @@ class Session {
                 $timer->cancel();
             });
         }
-
-        echo colorize($this->sid, 'yellow'). " : ".colorize($conn->resourceId." deconnected\n", 'red');
     }
 
     public function countClients()
@@ -66,13 +81,16 @@ class Session {
 
         // Launching the linker
         $this->process = new \React\ChildProcess\Process(
-                                        'exec php linker.php ' . $this->sid,
-                                        null,
-                                        array(
-                                            'sid'       => $this->sid,
-                                            'baseuri'   => $this->baseuri
-                                        )
-                                    );
+                            'exec php linker.php ' . $this->sid,
+                            null,
+                            [
+                                'sid'       => $this->sid,
+                                'baseuri'   => $this->baseuri,
+                                'language'  => $this->language,
+                                'verbose'   => $this->verbose,
+                                'debug'     => $this->debug
+                            ]
+                        );
 
         $this->process->start($loop);
 
@@ -89,7 +107,10 @@ class Session {
 
         // The linker died, we close properly the session
         $this->process->on('exit', function($output) use ($me) {
-            echo colorize($this->sid, 'yellow'). " : ".colorize("linker killed \n", 'red');
+            if($me->verbose) {
+                echo colorize($this->sid, 'yellow'). " : ".colorize("linker killed \n", 'red');
+            }
+
             $me->process = null;
             $me->closeAll();
 

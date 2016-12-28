@@ -14,11 +14,12 @@ use Respect\Validation\Validator;
 
 use Ramsey\Uuid\Uuid;
 
+use Movim\Picture;
+
 class Chat extends \Movim\Widget\Base
 {
     private $_pagination = 30;
-    private $_wrapper = array();
-    private $_msgMap = array();
+    private $_wrapper = [];
 
     function load()
     {
@@ -91,6 +92,17 @@ class Chat extends \Movim\Widget\Base
                     4,
                     $this->route('chat', $contact->jid)
                 );
+            } elseif ($message->type == 'groupchat'
+                   && $message->quoted) {
+                $cd = new \Modl\ConferenceDAO;
+                $c = $cd->get($from);
+
+                Notification::append(
+                    'chat|'.$from,
+                    ($c != null && $c->name) ? $c->name : $from,
+                    $message->resource.': '.$message->body,
+                    false,
+                    4);
             }
 
             RPC::call('MovimTpl.fill', '#' . cleanupId($from.'_state'), $contact->jid);
@@ -192,8 +204,8 @@ class Chat extends \Movim\Widget\Base
 
             RPC::call('MovimUtils.addClass', '#chat_widget', 'fixed');
             RPC::call('MovimTpl.fill', '#chat_widget', $html);
+            RPC::call('Chat.focus', $jid);
             RPC::call('MovimTpl.showPanel');
-            RPC::call('Chat.focus');
 
             $this->prepareMessages($jid);
         }
@@ -216,16 +228,32 @@ class Chat extends \Movim\Widget\Base
     {
         if(!$this->validateJid($room)) return;
 
-        $html = $this->prepareChat($room, true);
+        $cod = new \modl\ConferenceDAO();
+        $r = $cod->get($room);
 
-        RPC::call('MovimUtils.pushState', $this->route('chat'));
+        if($r) {
+            $rooms = new Rooms;
+            if(!$rooms->checkConnected($r->conference, $r->nick)) {
+                RPC::call('Rooms_ajaxJoin', $r->conference, $r->nick);
+            }
 
-        RPC::call('MovimUtils.addClass', '#chat_widget', 'fixed');
-        RPC::call('MovimTpl.fill', '#chat_widget', $html);
-        RPC::call('MovimTpl.showPanel');
-        RPC::call('Chat.focus');
+            $html = $this->prepareChat($room, true);
 
-        $this->prepareMessages($room, true);
+            RPC::call('MovimUtils.pushState', $this->route('chat', [$room, 'room']));
+
+            RPC::call('MovimUtils.addClass', '#chat_widget', 'fixed');
+            RPC::call('MovimTpl.fill', '#chat_widget', $html);
+            RPC::call('MovimTpl.showPanel');
+            RPC::call('Chat.focus');
+
+            $this->prepareMessages($room, true);
+
+            $notif = new Notification;
+            $notif->ajaxClear('chat|'.$room);
+            RPC::call('Notification.current', 'chat|'.$room);
+        } else {
+            RPC::call('Rooms_ajaxAdd', $room);
+        }
     }
 
     /**
@@ -235,13 +263,14 @@ class Chat extends \Movim\Widget\Base
      * @param string $message
      * @return void
      */
-    function ajaxSendMessage($to, $message, $muc = false, $resource = false, $replace = false) {
-        $body = trim(rawurldecode($message));
+    function ajaxSendMessage($to, $message, $muc = false, $resource = false, $replace = false)
+    {
+        $body = (string)htmlentities(trim(rawurldecode($message)), ENT_XML1, 'UTF-8', false);
 
         if($body == '' || $body == '/me')
             return;
 
-        $m = new \Modl\Message();
+        $m = new \Modl\Message;
         $m->session = $this->user->getLogin();
         $m->jidto   = echapJid($to);
         $m->jidfrom = $this->user->getLogin();
@@ -269,8 +298,6 @@ class Chat extends \Movim\Widget\Base
         }
 
         $m->body      = $body;
-        $m->checkPicture();
-        //$m->html      = prepareString($m->body, false, true);
 
         if($resource != false) {
             $to = $to . '/' . $resource;
@@ -302,9 +329,9 @@ class Chat extends \Movim\Widget\Base
                 $md->set($m);
             }
 
-            $packet = new Moxl\Xec\Payload\Packet;
+            $packet = new \Moxl\Xec\Payload\Packet;
             $packet->content = $m;
-            $this->onMessage($packet/*, true*/);
+            $this->onMessage($packet);
         }
     }
 
@@ -376,24 +403,18 @@ class Chat extends \Movim\Widget\Base
     {
         if(!$this->validateJid($jid)) return;
         $md = new \Modl\MessageDAO;
-        $messages = $md->getHistory(echapJid($jid), date(DATE_ISO8601, strtotime($date)), $this->_pagination);
+        $messages = $md->getHistory(echapJid($jid), $date, $this->_pagination);
 
         if(count($messages) > 0) {
             Notification::append(false, $this->__('message.history', count($messages)));
 
             foreach($messages as $message) {
                 if(!preg_match('#^\?OTR#', $message->body)) {
-                    //RPC::call('Chat.appendMessage', $this->prepareMessage($message), true);
-                    //$this->_msgMap[$message->published.$message->jid] = $message;
                     $this->prepareMessage($message);
                 }
             }
-            //foreach($this->_msgMap as $message)
-            //    $this->prepareMessage($message);
             RPC::call('Chat.appendMessagesWrapper', $this->_wrapper, true);
-            $this->_wrapper = array();
-
-            //RPC::call('Chat.cleanBubbles');
+            $this->_wrapper = [];
         }
     }
 
@@ -468,9 +489,6 @@ class Chat extends \Movim\Widget\Base
 
         $jid = echapJS($jid);
 
-        $view->assign('composing', $this->call('ajaxSendComposing', "'" . $jid . "'"));
-        $view->assign('paused', $this->call('ajaxSendPaused', "'" . $jid . "'"));
-
         $view->assign('smiley', $this->call('ajaxSmiley'));
 
         $view->assign('emoji', prepareString('😀'));
@@ -523,11 +541,6 @@ class Chat extends \Movim\Widget\Base
         if(is_array($messages)) {
             $messages = array_reverse($messages);
 
-            /*foreach($messages as $message) {
-                $this->_msgMap[$message->published.$message->jid] = $message;
-            }
-
-            foreach($this->_msgMap as $message) {*/
             foreach($messages as $message) {
                 $this->prepareMessage($message);
             }
@@ -557,9 +570,10 @@ class Chat extends \Movim\Widget\Base
         //RPC::call('Chat.appendMessages', $messages);
         RPC::call('Chat.appendMessagesWrapper', $this->_wrapper);
         RPC::call('MovimTpl.scrollPanel');
+        RPC::call('Chat.clearReplace');
     }
 
-    function prepareMessage(&$message, $jid=null)
+    function prepareMessage(&$message, $jid = null)
     {
         if($jid != $message->jidto && $jid != $message->jidfrom && $jid != null)
             return $this->_wrapper;
@@ -570,10 +584,8 @@ class Chat extends \Movim\Widget\Base
         if (isset($message->html)) {
             $message->body = $message->html;
         } else {
-            // We add some smileys...
             $message->convertEmojis();
             $message->addUrls();
-            //    $message->body = prepareString(htmlentities($message->body , ENT_COMPAT,'UTF-8'));
         }
 
         if (isset($message->sticker)) {
@@ -603,6 +615,7 @@ class Chat extends \Movim\Widget\Base
             ];
         }
 
+        $message->rtl = isRTL($message->body);
 
         $message->publishedPrepared = prepareDate(strtotime($message->published), true);
 
@@ -617,34 +630,40 @@ class Chat extends \Movim\Widget\Base
 
             //fillup $wrapper
             if ($message->body != "") {
-                if (!array_key_exists($date, $this->_wrapper))
+                if (!array_key_exists($date, $this->_wrapper)) {
                     $this->_wrapper[$date] = [$message];
-                else
+                } else {
                     array_push($this->_wrapper[$date], $message);
+                }
             }
         } else {
             $msgkey = $message->jidfrom . '>' . substr($message->published, 11, 5);
+
             //fillup $wrapper
             if (!array_key_exists($date, $this->_wrapper)) {
                 $sticker = "";
+
                 if (isset($message->sticker)) {
                     $sticker = "sticker";
                 }
+
                 $this->_wrapper[$date] = ['0' . $sticker . '<' . $msgkey => [$message]];
             } else { //date contains at least one speaker@time=>msg already
                 end($this->_wrapper[$date]);
                 $lastkey = key($this->_wrapper[$date]);
+
                 if (substr($lastkey, strpos($lastkey, '<') + 1) == $msgkey // same jidfrom, same min
                     && !isset($message->sticker) // this msg is not a sticker
                     && strpos($lastkey, "sticker<") === false
                 ) { // the previous msg was not a sticker
                     array_push($this->_wrapper[$date][$lastkey], $message);
-                }
-                else {
+                } else {
                     $sticker = "";
+
                     if (isset($message->sticker)) {
                         $sticker = "sticker";
                     }
+
                     $this->_wrapper[$date][count($this->_wrapper[$date]) . $sticker . '<' . $msgkey] = [$message];
                 }
             }
@@ -657,9 +676,12 @@ class Chat extends \Movim\Widget\Base
     {
         $view = $this->tpl();
 
+        $chats = \Movim\Cache::c('chats');
+        $chats = ($chats == null) ? false : array_keys($chats);
+
         $cd = new \Modl\ContactDAO;
         $view->assign('presencestxt', getPresencesTxt());
-        $view->assign('top', $cd->getTop(8));
+        $view->assign('top', $cd->getTop(8, $chats));
         return $view->draw('_chat_empty', true);
     }
 
@@ -682,9 +704,5 @@ class Chat extends \Movim\Widget\Base
 
     function display()
     {
-        $this->view->assign('jid', false);
-        if($this->validateJid($this->get('f'))) {
-            $this->view->assign('jid', $this->get('f'));
-        }
     }
 }
